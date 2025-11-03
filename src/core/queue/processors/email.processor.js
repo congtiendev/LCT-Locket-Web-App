@@ -1,17 +1,25 @@
 const logger = require('@utils/logger');
+const mailService = require('@core/mail/mail.service');
 
 const processEmail = async (job) => {
-  const { to, subject, body } = job.data;
+  const { to, subject, html, text, from } = job.data;
 
   try {
-    logger.info(`Sending email to ${to}: ${subject}`);
+    logger.info(`Processing email job - sending to ${to}: ${subject}`);
 
-    // TODO: Implement actual email sending logic
-    // Example: await nodemailer.sendMail({ to, subject, html: body });
+    const result = await mailService.sendMail({
+      to,
+      subject,
+      html: html || job.data.body, // Support both 'html' and 'body' for backward compatibility
+      text,
+      from,
+    });
 
-    return { success: true, message: 'Email sent successfully' };
+    logger.info(`Email job completed successfully: ${result.messageId}`);
+
+    return result;
   } catch (error) {
-    logger.error('Email sending failed:', error);
+    logger.error('Email job processing failed:', error);
     throw error;
   }
 };
