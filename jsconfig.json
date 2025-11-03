@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@core/*": [
+        "src/core/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@utils/*": [
+        "src/shared/utils/*"
+      ],
+      "@middlewares/*": [
+        "src/shared/middlewares/*"
+      ],
+      "@exceptions/*": [
+        "src/shared/exceptions/*"
+      ],
+      "@constants/*": [
+        "src/shared/constants/*"
+      ],
+      "@helpers/*": [
+        "src/shared/helpers/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

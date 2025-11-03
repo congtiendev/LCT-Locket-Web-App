@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCT Node.js Core - API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .auth-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .token-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .token-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .token-input button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .token-input button:hover {
+            background: #5568d3;
+        }
+
+        .token-status {
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .token-status.active {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .token-status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .endpoint-group {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .endpoint-group h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .method {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .method.get { background: #61affe; color: white; }
+        .method.post { background: #49cc90; color: white; }
+        .method.put { background: #fca130; color: white; }
+        .method.delete { background: #f93e3e; color: white; }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .endpoint-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .endpoint-details {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .detail-section {
+            margin-bottom: 15px;
+        }
+
+        .detail-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .try-it-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .try-it-section h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            font-family: 'Courier New', monospace;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .response-section {
+            margin-top: 15px;
+        }
+
+        .response-section h5 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .response-box {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-success {
+            border-left: 4px solid #49cc90;
+        }
+
+        .response-error {
+            border-left: 4px solid #f93e3e;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge.auth-required {
+            background: #fca130;
+            color: white;
+        }
+
+        .badge.admin-only {
+            background: #f93e3e;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LCT Node.js Core API</h1>
+            <p>Enterprise-grade REST API Documentation</p>
+            <p style="margin-top: 10px; font-size: 14px;"><strong>Base URL:</strong> <code>http://localhost:3000/api</code></p>
+        </div>
+
+        <!-- Authentication Token Section -->
+        <div class="auth-section">
+            <h3>Authentication</h3>
+            <p style="margin-bottom: 15px; color: #666;">Set your access token here to test authenticated endpoints:</p>
+            <div class="token-input">
+                <input type="text" id="accessToken" placeholder="Paste your access token here...">
+                <button onclick="setToken()">Set Token</button>
+                <button onclick="clearToken()" style="background: #f93e3e;">Clear</button>
+            </div>
+            <div id="tokenStatus" class="token-status inactive">
+                No token set - Only public endpoints available
+            </div>
+        </div>
+
+        <!-- Health Check -->
+        <div class="endpoint-group">
+            <h2>System</h2>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/health</span>
+                </div>
+                <div class="endpoint-description">
+                    Check API health status and uptime
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Response Example:</h4>
+                        <div class="code-block">{
+  "status": "ok",
+  "timestamp": "2025-11-03T02:42:28.000Z",
+  "uptime": 123.456
+}</div>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <button class="btn btn-primary" onclick="testEndpoint('GET', '/health', null, 'health-response')">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="health-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Authentication Endpoints -->
+        <div class="endpoint-group">
+            <h2>Authentication</h2>
+
+            <!-- Register -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-path">/auth/register</span>
+                </div>
+                <div class="endpoint-description">
+                    Register a new user account
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Request Body:</h4>
+                        <div class="code-block">{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}</div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>Validation Rules:</h4>
+                        <ul style="margin-left: 20px; color: #666;">
+                            <li>name: 2-100 characters (required)</li>
+                            <li>email: valid email format (required)</li>
+                            <li>password: minimum 8 characters (required)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" id="register-name" value="Test User">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="register-email" value="test@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="register-password" value="password123">
+                    </div>
+                    <button class="btn btn-primary" onclick="testRegister()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="register-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-path">/auth/login</span>
+                </div>
+                <div class="endpoint-description">
+                    Login with email and password to get access token
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Request Body:</h4>
+                        <div class="code-block">{
+  "email": "john@example.com",
+  "password": "password123"
+}</div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>Response Example:</h4>
+                        <div class="code-block">{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "...",
+      "email": "john@example.com",
+      "name": "John Doe"
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}</div>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="login-email" value="test@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" id="login-password" value="password123">
+                    </div>
+                    <button class="btn btn-primary" onclick="testLogin()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="login-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Get Me -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/auth/me</span>
+                    <span class="badge auth-required">Auth Required</span>
+                </div>
+                <div class="endpoint-description">
+                    Get current authenticated user information
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <button class="btn btn-primary" onclick="testEndpoint('GET', '/auth/me', null, 'me-response', true)">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="me-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-path">/auth/logout</span>
+                    <span class="badge auth-required">Auth Required</span>
+                </div>
+                <div class="endpoint-description">
+                    Logout current user (invalidate tokens)
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <button class="btn btn-primary" onclick="testEndpoint('POST', '/auth/logout', null, 'logout-response', true)">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="logout-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Refresh Token -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-path">/auth/refresh-token</span>
+                </div>
+                <div class="endpoint-description">
+                    Get new access token using refresh token
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Request Body:</h4>
+                        <div class="code-block">{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+}</div>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>Refresh Token:</label>
+                        <input type="text" id="refresh-token" placeholder="Paste refresh token here">
+                    </div>
+                    <button class="btn btn-primary" onclick="testRefreshToken()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="refresh-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-path">/auth/change-password</span>
+                    <span class="badge auth-required">Auth Required</span>
+                </div>
+                <div class="endpoint-description">
+                    Change current user password
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Request Body:</h4>
+                        <div class="code-block">{
+  "oldPassword": "oldpassword123",
+  "newPassword": "newpassword123"
+}</div>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>Old Password:</label>
+                        <input type="password" id="old-password" placeholder="Enter old password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password:</label>
+                        <input type="password" id="new-password" placeholder="Enter new password (min 8 chars)">
+                    </div>
+                    <button class="btn btn-primary" onclick="testChangePassword()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="change-password-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Endpoints -->
+        <div class="endpoint-group">
+            <h2>User Profile</h2>
+
+            <!-- Get Profile -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/users/profile</span>
+                    <span class="badge auth-required">Auth Required</span>
+                </div>
+                <div class="endpoint-description">
+                    Get current user profile details
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <button class="btn btn-primary" onclick="testEndpoint('GET', '/users/profile', null, 'profile-response', true)">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="profile-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Profile -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method put">PUT</span>
+                    <span class="endpoint-path">/users/profile</span>
+                    <span class="badge auth-required">Auth Required</span>
+                </div>
+                <div class="endpoint-description">
+                    Update current user profile
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Request Body:</h4>
+                        <div class="code-block">{
+  "name": "John Doe Updated",
+  "bio": "Software Developer",
+  "phone": "+1234567890"
+}</div>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>Request Body (JSON):</label>
+                        <textarea id="update-profile-body">{"name": "John Doe Updated", "bio": "Software Developer"}</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="testUpdateProfile()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="update-profile-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management (Admin) -->
+        <div class="endpoint-group">
+            <h2>User Management (Admin Only)</h2>
+
+            <!-- Get All Users -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/users</span>
+                    <span class="badge auth-required">Auth Required</span>
+                    <span class="badge admin-only">Admin Only</span>
+                </div>
+                <div class="endpoint-description">
+                    Get all users with pagination (Admin only)
+                </div>
+                <div class="endpoint-details">
+                    <div class="detail-section">
+                        <h4>Query Parameters:</h4>
+                        <ul style="margin-left: 20px; color: #666;">
+                            <li>page: Page number (default: 1)</li>
+                            <li>limit: Items per page (default: 20)</li>
+                            <li>search: Search by name or email</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <button class="btn btn-primary" onclick="testEndpoint('GET', '/users?page=1&limit=10', null, 'users-response', true)">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="users-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Get User By ID -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/users/:id</span>
+                    <span class="badge auth-required">Auth Required</span>
+                    <span class="badge admin-only">Admin Only</span>
+                </div>
+                <div class="endpoint-description">
+                    Get user by ID (Admin only)
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>User ID:</label>
+                        <input type="text" id="user-id" placeholder="Enter user ID">
+                    </div>
+                    <button class="btn btn-primary" onclick="testGetUserById()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="user-by-id-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete User -->
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="endpoint-path">/users/:id</span>
+                    <span class="badge auth-required">Auth Required</span>
+                    <span class="badge admin-only">Admin Only</span>
+                </div>
+                <div class="endpoint-description">
+                    Delete user by ID (Admin only)
+                </div>
+                <div class="try-it-section">
+                    <h4>Try it out</h4>
+                    <div class="form-group">
+                        <label>User ID:</label>
+                        <input type="text" id="delete-user-id" placeholder="Enter user ID">
+                    </div>
+                    <button class="btn btn-primary" onclick="testDeleteUser()">Send Request</button>
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <div id="delete-user-response" class="response-box">Click "Send Request" to see the response</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000/api';
+        let globalToken = null;
+
+        // Token Management
+        function setToken() {
+            const token = document.getElementById('accessToken').value.trim();
+            if (token) {
+                globalToken = token;
+                localStorage.setItem('apiToken', token);
+                updateTokenStatus(true);
+            } else {
+                alert('Please enter a valid token');
+            }
+        }
+
+        function clearToken() {
+            globalToken = null;
+            localStorage.removeItem('apiToken');
+            document.getElementById('accessToken').value = '';
+            updateTokenStatus(false);
+        }
+
+        function updateTokenStatus(hasToken) {
+            const statusEl = document.getElementById('tokenStatus');
+            if (hasToken) {
+                statusEl.className = 'token-status active';
+                statusEl.textContent = 'Token set - You can now test authenticated endpoints';
+            } else {
+                statusEl.className = 'token-status inactive';
+                statusEl.textContent = 'No token set - Only public endpoints available';
+            }
+        }
+
+        // Load token from localStorage on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('apiToken');
+            if (savedToken) {
+                globalToken = savedToken;
+                document.getElementById('accessToken').value = savedToken;
+                updateTokenStatus(true);
+            }
+        });
+
+        // Generic API Test Function
+        async function testEndpoint(method, path, body, responseId, requiresAuth = false) {
+            const responseEl = document.getElementById(responseId);
+            responseEl.textContent = 'Loading...';
+            responseEl.className = 'response-box';
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                if (requiresAuth) {
+                    if (!globalToken) {
+                        throw new Error('Authentication required. Please set your access token first.');
+                    }
+                    headers['Authorization'] = `Bearer ${globalToken}`;
+                }
+
+                const options = {
+                    method: method,
+                    headers: headers,
+                };
+
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${BASE_URL}${path}`, options);
+                const data = await response.json();
+
+                responseEl.textContent = JSON.stringify(data, null, 2);
+                responseEl.className = response.ok ? 'response-box response-success' : 'response-box response-error';
+            } catch (error) {
+                responseEl.textContent = `Error: ${error.message}`;
+                responseEl.className = 'response-box response-error';
+            }
+        }
+
+        // Specific Test Functions
+        async function testRegister() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            await testEndpoint('POST', '/auth/register', { name, email, password }, 'register-response');
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const responseEl = document.getElementById('login-response');
+
+            responseEl.textContent = 'Loading...';
+            responseEl.className = 'response-box';
+
+            try {
+                const response = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+                responseEl.textContent = JSON.stringify(data, null, 2);
+                responseEl.className = response.ok ? 'response-box response-success' : 'response-box response-error';
+
+                // Auto-save token if login successful
+                if (response.ok && data.data && data.data.accessToken) {
+                    globalToken = data.data.accessToken;
+                    localStorage.setItem('apiToken', globalToken);
+                    document.getElementById('accessToken').value = globalToken;
+                    updateTokenStatus(true);
+                    alert('Login successful! Token has been automatically set.');
+                }
+            } catch (error) {
+                responseEl.textContent = `Error: ${error.message}`;
+                responseEl.className = 'response-box response-error';
+            }
+        }
+
+        async function testRefreshToken() {
+            const refreshToken = document.getElementById('refresh-token').value;
+            if (!refreshToken) {
+                alert('Please enter a refresh token');
+                return;
+            }
+            await testEndpoint('POST', '/auth/refresh-token', { refreshToken }, 'refresh-response');
+        }
+
+        async function testChangePassword() {
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+
+            if (!oldPassword || !newPassword) {
+                alert('Please enter both old and new passwords');
+                return;
+            }
+
+            await testEndpoint('POST', '/auth/change-password', { oldPassword, newPassword }, 'change-password-response', true);
+        }
+
+        async function testUpdateProfile() {
+            const bodyText = document.getElementById('update-profile-body').value;
+            try {
+                const body = JSON.parse(bodyText);
+                await testEndpoint('PUT', '/users/profile', body, 'update-profile-response', true);
+            } catch (error) {
+                alert('Invalid JSON format');
+            }
+        }
+
+        async function testGetUserById() {
+            const userId = document.getElementById('user-id').value;
+            if (!userId) {
+                alert('Please enter a user ID');
+                return;
+            }
+            await testEndpoint('GET', `/users/${userId}`, null, 'user-by-id-response', true);
+        }
+
+        async function testDeleteUser() {
+            const userId = document.getElementById('delete-user-id').value;
+            if (!userId) {
+                alert('Please enter a user ID');
+                return;
+            }
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
+            }
+            await testEndpoint('DELETE', `/users/${userId}`, null, 'delete-user-response', true);
+        }
+    </script>
+</body>
+</html>

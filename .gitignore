@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+# package-lock.json - Keep this for consistent deployments
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build output
+dist/
+build/
+out/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Prisma
+# Keep migrations for production deployment
+# prisma/migrations/**/migration.sql
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+.docker/
+
+# Other
+.cache/
+.parcel-cache/
+
+.zip/
+*.bak
+*.old
+*.orig
