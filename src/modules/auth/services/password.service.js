@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const AppException = require('@exceptions/app.exception');
 const { hashPassword, comparePassword } = require('@utils/crypto');
 const tokenService = require('./token.service');
+const mailService = require('@core/mail/mail.service');
 
 const prisma = new PrismaClient();
 
@@ -18,11 +19,18 @@ class PasswordService {
 
     const resetToken = tokenService.generatePasswordResetToken(user.id);
 
-    // TODO: Send email with reset link
-    // For now, just log the token
-    console.log(`Password reset token for ${email}: ${resetToken}`);
+    // Build reset URL
+    const resetUrl = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
-    return resetToken;
+    // Send password reset email
+    await mailService.sendPasswordResetEmail(
+      user.email,
+      user.name,
+      resetUrl,
+      '1 hour'
+    );
+
+    return { success: true, message: 'Password reset email sent' };
   }
 
   async resetPassword(token, newPassword) {

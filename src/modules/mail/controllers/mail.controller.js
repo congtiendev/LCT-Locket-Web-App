@@ -1,6 +1,7 @@
 const mailService = require('@core/mail/mail.service');
 const { successResponse, errorResponse } = require('@utils/response');
 const logger = require('@utils/logger');
+const HTTP_STATUS = require('@constants/http-status');
 
 class MailController {
   async sendTestEmail(req, res) {
@@ -15,7 +16,7 @@ class MailController {
 
       logger.info(`Test email sent to ${email}`);
 
-      return successResponse(res, result, 'Test email sent successfully');
+      return successResponse(res, result, 'Test email sent successfully', HTTP_STATUS.OK);
     } catch (error) {
       logger.error('Failed to send test email:', error);
       return errorResponse(res, error.message || 'Failed to send test email', 500);
@@ -26,7 +27,7 @@ class MailController {
     try {
       const result = await mailService.verifyConnection();
 
-      return successResponse(res, result, 'SMTP connection verified successfully');
+      return successResponse(res, result, 'SMTP connection verified successfully', HTTP_STATUS.OK);
     } catch (error) {
       logger.error('SMTP connection verification failed:', error);
       return errorResponse(
@@ -59,7 +60,7 @@ class MailController {
 
       logger.info(`Email sent to ${to}`);
 
-      return successResponse(res, result, 'Email sent successfully');
+      return successResponse(res, result, 'Email sent successfully', HTTP_STATUS.OK);
     } catch (error) {
       logger.error('Failed to send email:', error);
       return errorResponse(res, error.message || 'Failed to send email', 500);

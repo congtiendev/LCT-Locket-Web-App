@@ -3,7 +3,11 @@
     "allow": [
       "Bash(taskkill:*)",
       "Bash(npm run dev:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(npx prisma migrate dev:*)"
     ],
     "deny": [],
     "ask": []

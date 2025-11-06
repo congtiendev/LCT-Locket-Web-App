@@ -6,11 +6,15 @@ const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const passport = require('passport');
 
 const { errorHandler, notFoundHandler } = require('@middlewares/error.middleware');
 const morganMiddleware = require('@middlewares/logger.middleware');
 const { apiLimiter } = require('@middlewares/rate-limit.middleware');
 const routes = require('./routes');
+
+// Initialize Passport strategies
+require('@modules/auth/strategies/google.strategy');
 
 const app = express();
 
@@ -28,6 +32,9 @@ app.use(hpp());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Passport initialization
+app.use(passport.initialize());
 
 // Compression
 app.use(compression());

@@ -3,6 +3,7 @@ const validate = require('@middlewares/validate.middleware');
 const authController = require('../controllers/auth.controller');
 const passwordController = require('../controllers/password.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
+const googleAuthRoutes = require('./google-auth.routes');
 const {
   registerSchema,
   loginSchema,
@@ -31,5 +32,8 @@ router.post(
   validate(changePasswordSchema),
   passwordController.changePassword
 );
+
+// Google OAuth routes
+router.use('/google', googleAuthRoutes);
 
 module.exports = router;
