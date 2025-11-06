@@ -4,26 +4,29 @@ const prisma = new PrismaClient();
 
 class TokenRepository {
   async create(data) {
-    return prisma.token.create({
+    return prisma.refreshToken.create({
       data,
     });
   }
 
   async findByToken(token) {
-    return prisma.token.findUnique({
+    return prisma.refreshToken.findUnique({
       where: { token },
     });
   }
 
   async revoke(tokenId) {
-    return prisma.token.update({
+    return prisma.refreshToken.update({
       where: { id: tokenId },
-      data: { revoked: true },
+      data: { 
+        isRevoked: true,
+        revokedAt: new Date()
+      },
     });
   }
 
   async deleteExpired() {
-    return prisma.token.deleteMany({
+    return prisma.refreshToken.deleteMany({
       where: {
         expiresAt: {
           lt: new Date(),
@@ -33,9 +36,12 @@ class TokenRepository {
   }
 
   async revokeAllUserTokens(userId) {
-    return prisma.token.updateMany({
+    return prisma.refreshToken.updateMany({
       where: { userId },
-      data: { revoked: true },
+      data: { 
+        isRevoked: true,
+        revokedAt: new Date()
+      },
     });
   }
 }
