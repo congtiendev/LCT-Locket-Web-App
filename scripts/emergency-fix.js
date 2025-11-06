@@ -79,6 +79,40 @@ async function emergencyFix() {
       }
     }
     
+    // Fix enum values in existing data
+    console.log('🔄 Fixing enum values in existing data...');
+    try {
+      // Fix provider enum values
+      await prisma.$executeRawUnsafe(`
+        UPDATE "users" 
+        SET "provider" = 'google' 
+        WHERE "provider" = 'GOOGLE'
+      `);
+      
+      // Check if there are any other invalid enum values
+      const invalidProviders = await prisma.$queryRaw`
+        SELECT DISTINCT provider 
+        FROM "users" 
+        WHERE provider NOT IN ('email', 'google')
+      `;
+      
+      if (invalidProviders.length > 0) {
+        console.log('⚠️ Found invalid provider values:', invalidProviders.map(p => p.provider));
+        // Set them to 'email' as default
+        await prisma.$executeRawUnsafe(`
+          UPDATE "users" 
+          SET "provider" = 'email' 
+          WHERE "provider" NOT IN ('email', 'google')
+        `);
+        console.log('✅ Fixed invalid provider values');
+      } else {
+        console.log('✅ All provider values are valid');
+      }
+      
+    } catch (enumError) {
+      console.warn('⚠️ Enum fix issue:', enumError.message);
+    }
+    
     // Generate Prisma Client
     console.log('🔄 Generating Prisma Client...');
     try {
