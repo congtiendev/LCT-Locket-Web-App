@@ -4,7 +4,7 @@ echo "🚀 Starting LCT Locket Web App..."
 
 # Run database migrations
 echo "📦 Running database migrations..."
-npx prisma migrate deploy
+node scripts/reset-and-migrate.js
 
 # Seed database if needed (optional)
 echo "🌱 Seeding database..."
