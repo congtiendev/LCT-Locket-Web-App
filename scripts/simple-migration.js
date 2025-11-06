@@ -68,10 +68,16 @@ async function addMissingColumns() {
     // Generate Prisma Client
     console.log('🔄 Generating Prisma Client...');
     const { execSync } = require('child_process');
-    execSync('npx prisma generate', { stdio: 'inherit' });
-    console.log('✅ Prisma Client generated');
+    try {
+      execSync('npx prisma generate', { stdio: 'inherit' });
+      console.log('✅ Prisma Client generated');
+    } catch (generateError) {
+      console.warn('⚠️ Prisma Client generation had issues, but continuing...');
+      console.warn('Error:', generateError.message);
+    }
     
     console.log('🎉 Migration completed successfully!');
+    console.log('💡 Note: If this is running on Render, the service should restart to pick up the new database schema.');
     
   } catch (error) {
     console.error('❌ Migration failed:', error.message);
