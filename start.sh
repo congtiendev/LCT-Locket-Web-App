@@ -4,7 +4,7 @@ echo "🚀 Starting LCT Locket Web App..."
 
 # Run database migrations
 echo "📦 Running database migrations..."
-node scripts/reset-and-migrate.js
+node scripts/emergency-fix.js
 
 # Seed database if needed (optional)
 echo "🌱 Seeding database..."
