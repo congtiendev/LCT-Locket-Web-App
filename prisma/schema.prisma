@@ -15,7 +15,7 @@ datasource db {
 
 enum AuthProvider {
   email
-  google
+  GOOGLE
 }
 
 enum FriendRequestStatus {
@@ -31,22 +31,37 @@ enum NotificationType {
   message
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
 // ==================== MODELS ====================
 
-// 1. USERS TABLE (9 columns)
+// 1. USERS TABLE (extended columns)
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  password     String?       // Nullable for Google OAuth
-  name         String
-  username     String?       @unique
-  avatar       String?
-  bio          String?
-  provider     AuthProvider  @default(email)
-  googleId     String?       @unique @map("google_id")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  lastLoginAt  DateTime?     @map("last_login_at")
+  id            String        @id @default(uuid())
+  email         String        @unique
+  password      String?       // Nullable for Google OAuth
+  name          String
+  username      String?       @unique
+  avatar        String?
+  bio           String?
+  role          UserRole      @default(USER)
+  phone         String?
+  status        UserStatus    @default(ACTIVE)
+  emailVerified Boolean       @default(false) @map("email_verified")
+  provider      AuthProvider  @default(email)
+  googleId      String?       @unique @map("google_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  lastLoginAt   DateTime?     @map("last_login_at")
 
   // Relations
   settings         UserSettings?
