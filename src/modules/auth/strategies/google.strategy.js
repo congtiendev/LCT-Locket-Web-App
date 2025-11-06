@@ -40,6 +40,14 @@ if (isGoogleOAuthEnabled) {
         // Check if user exists with this Google ID
         let user = await prisma.user.findUnique({
           where: { googleId },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            avatar: true,
+            provider: true,
+            googleId: true,
+          },
         });
 
         if (user) {
@@ -51,6 +59,14 @@ if (isGoogleOAuthEnabled) {
         // Check if user exists with this email
         user = await prisma.user.findUnique({
           where: { email },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            avatar: true,
+            provider: true,
+            googleId: true,
+          },
         });
 
         if (user) {
@@ -62,9 +78,17 @@ if (isGoogleOAuthEnabled) {
             where: { id: user.id },
             data: {
               googleId,
-              provider: 'GOOGLE',
-              emailVerified: true, // Google emails are verified
+              provider: 'google',
               avatar: avatar || user.avatar,
+              lastLoginAt: new Date(),
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              avatar: true,
+              provider: true,
+              googleId: true,
             },
           });
 
@@ -80,9 +104,16 @@ if (isGoogleOAuthEnabled) {
             googleId,
             name,
             avatar,
-            provider: 'GOOGLE',
-            emailVerified: true, // Google emails are already verified
-            status: 'ACTIVE',
+            provider: 'google',
+            lastLoginAt: new Date(),
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            avatar: true,
+            provider: true,
+            googleId: true,
           },
         });
 
@@ -114,10 +145,9 @@ if (isGoogleOAuthEnabled) {
           id: true,
           email: true,
           name: true,
-          role: true,
           avatar: true,
-          status: true,
           provider: true,
+          googleId: true,
         },
       });
 

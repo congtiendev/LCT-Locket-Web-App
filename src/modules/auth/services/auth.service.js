@@ -51,6 +51,15 @@ class AuthService {
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        name: true,
+        avatar: true,
+        provider: true,
+        googleId: true,
+      },
     });
 
     if (!user) {
@@ -64,16 +73,15 @@ class AuthService {
       throw new AppException('Invalid email or password', 401);
     }
 
-    // Check if user is active
-    if (user.status !== 'ACTIVE') {
-      throw new AppException('Account is not active', 403);
-    }
+    // NOTE: The schema used by Prisma in this project does not include a `status` column.
+    // If you have an account status concept, add it to the Prisma schema and migrate the DB.
 
     // Generate tokens
     const tokens = await tokenService.generateAuthTokens(user);
 
     // Remove password from response
-    const { password: _password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user };
+    delete userWithoutPassword.password;
 
     return {
       user: userWithoutPassword,
@@ -88,13 +96,13 @@ class AuthService {
         id: true,
         email: true,
         name: true,
-        role: true,
         avatar: true,
-        phone: true,
-        status: true,
-        emailVerified: true,
+        username: true,
+        provider: true,
+        googleId: true,
         createdAt: true,
         updatedAt: true,
+        lastLoginAt: true,
       },
     });
 
@@ -106,13 +114,11 @@ class AuthService {
   }
 
   async verifyEmail(token) {
-    const decoded = await tokenService.verifyToken(token, 'EMAIL_VERIFICATION');
+    await tokenService.verifyToken(token, 'EMAIL_VERIFICATION');
 
-    await prisma.user.update({
-      where: { id: decoded.userId },
-      data: { emailVerified: true },
-    });
-
+    // The project schema currently does not include `emailVerified`. If you want to
+    // track email verification, add `emailVerified` to the Prisma `User` model and run a migration.
+    // For now, just revoke the verification token.
     await tokenService.revokeToken(token);
   }
 }
