@@ -20,6 +20,7 @@
     "migrate:force-columns": "node scripts/force-migration.js",
     "check:db": "node scripts/check-db-structure.js",
     "migrate:reset": "node scripts/reset-and-migrate.js",
+    "db:emergency-fix": "node scripts/emergency-fix.js",
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seeds/seed.js",
     "seed:prod": "node prisma/seeds/production-seed.js",
