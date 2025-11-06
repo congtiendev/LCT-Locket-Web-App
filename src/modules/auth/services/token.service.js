@@ -40,7 +40,6 @@ class TokenService {
     await tokenRepository.create({
       token: refreshToken,
       userId: user.id,
-      type: 'REFRESH',
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     });
 
