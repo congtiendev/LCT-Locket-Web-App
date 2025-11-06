@@ -30,9 +30,7 @@ async function resetAndMigrate() {
     // Reset the migration history
     console.log('🔄 Resetting migration history...');
     try {
-      await prisma.$executeRaw`
-        DROP TABLE IF EXISTS "_prisma_migrations";
-      `;
+      await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "_prisma_migrations"');
       console.log('✅ Migration history reset');
     } catch (resetError) {
       console.warn('⚠️ Migration history reset failed or table does not exist:', resetError.message);
@@ -52,10 +50,10 @@ async function resetAndMigrate() {
         
         if (exists.length === 0) {
           console.log(`➕ Adding ${columnName} column...`);
-          await prisma.$executeRaw`ALTER TABLE "users" ADD COLUMN ${prisma.$queryRawUnsafe(`"${columnName}" ${columnType}`)}`;
+          await prisma.$executeRawUnsafe(`ALTER TABLE "users" ADD COLUMN "${columnName}" ${columnType}`);
           
           if (constraint) {
-            await prisma.$executeRaw`${prisma.$queryRawUnsafe(constraint)}`;
+            await prisma.$executeRawUnsafe(constraint);
           }
           
           console.log(`✅ Added ${columnName} column`);
@@ -76,7 +74,7 @@ async function resetAndMigrate() {
     // Create indexes if they don't exist
     const createIndexIfNotExists = async (indexName, sql) => {
       try {
-        await prisma.$executeRaw`${prisma.$queryRawUnsafe(sql)}`;
+        await prisma.$executeRawUnsafe(sql);
         console.log(`✅ Index ${indexName} created or already exists`);
       } catch (error) {
         console.warn(`⚠️ Index ${indexName} creation issue:`, error.message);
