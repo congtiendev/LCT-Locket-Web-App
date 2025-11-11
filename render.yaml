@@ -4,8 +4,8 @@ services:
     env: node
     region: singapore
     plan: free
-    buildCommand: npm ci && npx prisma migrate deploy && npx prisma generate
-    startCommand: npm start
+    buildCommand: npm ci && npm run build
+    startCommand: ./start.sh
     envVars:
       - key: NODE_ENV
         value: production
