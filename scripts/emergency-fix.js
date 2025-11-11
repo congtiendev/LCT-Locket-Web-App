@@ -12,10 +12,10 @@ const prisma = new PrismaClient();
 async function emergencyFix() {
   try {
     console.log('🚨 Emergency database fix starting...');
-    
+
     await prisma.$connect();
     console.log('✅ Connected to database');
-    
+
     // List all current columns
     console.log('📋 Checking current table structure...');
     const currentColumns = await prisma.$queryRaw`
@@ -24,35 +24,48 @@ async function emergencyFix() {
       WHERE table_name = 'users'
       ORDER BY ordinal_position
     `;
-    
+
     console.log('Current columns:');
-    currentColumns.forEach(col => {
+    currentColumns.forEach((col) => {
       console.log(`  - ${col.column_name} (${col.data_type})`);
     });
-    
-    const columnNames = currentColumns.map(col => col.column_name);
-    
+
+    const columnNames = currentColumns.map((col) => col.column_name);
+
     // Add missing columns with direct SQL
     const requiredColumns = [
-      { name: 'google_id', type: 'TEXT', constraint: 'ADD CONSTRAINT "users_google_id_key" UNIQUE ("google_id")' },
-      { name: 'username', type: 'TEXT', constraint: 'ADD CONSTRAINT "users_username_key" UNIQUE ("username")' },
+      {
+        name: 'google_id',
+        type: 'TEXT',
+        constraint: 'ADD CONSTRAINT "users_google_id_key" UNIQUE ("google_id")',
+      },
+      {
+        name: 'username',
+        type: 'TEXT',
+        constraint: 'ADD CONSTRAINT "users_username_key" UNIQUE ("username")',
+      },
       { name: 'bio', type: 'TEXT', constraint: null },
-      { name: 'last_login_at', type: 'TIMESTAMP(3)', constraint: null }
+      { name: 'last_login_at', type: 'TIMESTAMP(3)', constraint: null },
     ];
-    
+
     for (const col of requiredColumns) {
       if (!columnNames.includes(col.name)) {
         console.log(`➕ Adding ${col.name} column...`);
         try {
-          await prisma.$executeRawUnsafe(`ALTER TABLE "users" ADD COLUMN "${col.name}" ${col.type}`);
+          await prisma.$executeRawUnsafe(
+            `ALTER TABLE "users" ADD COLUMN "${col.name}" ${col.type}`
+          );
           console.log(`✅ Added ${col.name} column`);
-          
+
           if (col.constraint) {
             try {
               await prisma.$executeRawUnsafe(`ALTER TABLE "users" ${col.constraint}`);
               console.log(`✅ Added constraint for ${col.name}`);
             } catch (constraintError) {
-              console.warn(`⚠️ Constraint for ${col.name} may already exist:`, constraintError.message);
+              console.warn(
+                `⚠️ Constraint for ${col.name} may already exist:`,
+                constraintError.message
+              );
             }
           }
         } catch (addError) {
@@ -62,14 +75,14 @@ async function emergencyFix() {
         console.log(`✅ ${col.name} column already exists`);
       }
     }
-    
+
     // Create indexes
     const indexes = [
       'CREATE INDEX IF NOT EXISTS "users_email_idx" ON "users"("email")',
-      'CREATE INDEX IF NOT EXISTS "users_username_idx" ON "users"("username")',  
-      'CREATE INDEX IF NOT EXISTS "users_google_id_idx" ON "users"("google_id")'
+      'CREATE INDEX IF NOT EXISTS "users_username_idx" ON "users"("username")',
+      'CREATE INDEX IF NOT EXISTS "users_google_id_idx" ON "users"("google_id")',
     ];
-    
+
     for (const indexSql of indexes) {
       try {
         await prisma.$executeRawUnsafe(indexSql);
@@ -78,7 +91,7 @@ async function emergencyFix() {
         console.warn('⚠️ Index creation issue (may already exist):', indexError.message);
       }
     }
-    
+
     // Fix enum values in existing data
     console.log('🔄 Fixing enum values in existing data...');
     try {
@@ -88,16 +101,19 @@ async function emergencyFix() {
         SET "provider" = 'google' 
         WHERE "provider" = 'GOOGLE'
       `);
-      
+
       // Check if there are any other invalid enum values
       const invalidProviders = await prisma.$queryRaw`
         SELECT DISTINCT provider 
         FROM "users" 
         WHERE provider NOT IN ('email', 'google')
       `;
-      
+
       if (invalidProviders.length > 0) {
-        console.log('⚠️ Found invalid provider values:', invalidProviders.map(p => p.provider));
+        console.log(
+          '⚠️ Found invalid provider values:',
+          invalidProviders.map((p) => p.provider)
+        );
         // Set them to 'email' as default
         await prisma.$executeRawUnsafe(`
           UPDATE "users" 
@@ -108,11 +124,10 @@ async function emergencyFix() {
       } else {
         console.log('✅ All provider values are valid');
       }
-      
     } catch (enumError) {
       console.warn('⚠️ Enum fix issue:', enumError.message);
     }
-    
+
     // Generate Prisma Client
     console.log('🔄 Generating Prisma Client...');
     try {
@@ -121,9 +136,8 @@ async function emergencyFix() {
     } catch (generateError) {
       console.warn('⚠️ Prisma generate issue:', generateError.message);
     }
-    
+
     console.log('🎉 Emergency fix completed!');
-    
   } catch (error) {
     console.error('❌ Emergency fix failed:', error.message);
     // Don't exit with error to allow server to start

@@ -18,9 +18,9 @@ class TokenRepository {
   async revoke(tokenId) {
     return prisma.refreshToken.update({
       where: { id: tokenId },
-      data: { 
+      data: {
         isRevoked: true,
-        revokedAt: new Date()
+        revokedAt: new Date(),
       },
     });
   }
@@ -38,9 +38,9 @@ class TokenRepository {
   async revokeAllUserTokens(userId) {
     return prisma.refreshToken.updateMany({
       where: { userId },
-      data: { 
+      data: {
         isRevoked: true,
-        revokedAt: new Date()
+        revokedAt: new Date(),
       },
     });
   }

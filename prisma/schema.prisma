@@ -15,7 +15,7 @@ datasource db {
 
 enum AuthProvider {
   email
-  GOOGLE
+  google
 }
 
 enum FriendRequestStatus {
