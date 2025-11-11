@@ -12,29 +12,33 @@ console.log('🔄 Starting production migration for missing columns...');
 
 try {
   // Check if we're in production
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('postgres://');
-  
+  const isProduction =
+    process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('postgres://');
+
   if (isProduction) {
     console.log('📦 Production environment detected');
-    
+
     // Run the custom migration SQL
-    const migrationPath = path.join(__dirname, '../prisma/migrations/20250106100000_add_missing_columns/migration.sql');
-    
+    const migrationPath = path.join(
+      __dirname,
+      '../prisma/migrations/20250106100000_add_missing_columns/migration.sql'
+    );
+
     console.log('🗄️  Applying custom migration...');
-    
+
     // Use psql if available, otherwise use prisma db execute
     try {
-      execSync(`psql "${process.env.DATABASE_URL}" -f "${migrationPath}"`, { 
+      execSync(`psql "${process.env.DATABASE_URL}" -f "${migrationPath}"`, {
         stdio: 'inherit',
-        timeout: 30000 
+        timeout: 30000,
       });
       console.log('✅ Custom migration applied successfully!');
     } catch (error) {
       // Fallback to prisma db execute
       console.log('⚠️  psql not available, using prisma db execute...');
-      execSync(`npx prisma db execute --file "${migrationPath}" --schema prisma/schema.prisma`, { 
+      execSync(`npx prisma db execute --file "${migrationPath}" --schema prisma/schema.prisma`, {
         stdio: 'inherit',
-        timeout: 30000 
+        timeout: 30000,
       });
       console.log('✅ Migration applied via Prisma!');
     }
