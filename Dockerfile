@@ -9,14 +9,11 @@ RUN apk add --no-cache openssl libc6-compat curl
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy prisma schema
+# Copy prisma schema BEFORE npm install (required for postinstall hook)
 COPY prisma ./prisma/
 
-# Generate Prisma Client
-RUN npx prisma generate
+# Install dependencies (will trigger postinstall: prisma generate)
+RUN npm ci --only=production && npm cache clean --force
 
 # Copy application code
 COPY . .
