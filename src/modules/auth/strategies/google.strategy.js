@@ -47,6 +47,7 @@ if (isGoogleOAuthEnabled) {
               avatar: true,
               provider: true,
               googleId: true,
+              status: true,
             },
           });
 
@@ -66,6 +67,7 @@ if (isGoogleOAuthEnabled) {
               avatar: true,
               provider: true,
               googleId: true,
+              status: true,
             },
           });
 
@@ -89,6 +91,7 @@ if (isGoogleOAuthEnabled) {
                 avatar: true,
                 provider: true,
                 googleId: true,
+                status: true,
               },
             });
 
@@ -105,6 +108,7 @@ if (isGoogleOAuthEnabled) {
               name,
               avatar,
               provider: 'google',
+              status: 'ACTIVE',
               lastLoginAt: new Date(),
             },
             select: {
@@ -114,6 +118,7 @@ if (isGoogleOAuthEnabled) {
               avatar: true,
               provider: true,
               googleId: true,
+              status: true,
             },
           });
 
@@ -148,6 +153,7 @@ if (isGoogleOAuthEnabled) {
           avatar: true,
           provider: true,
           googleId: true,
+          status: true,
         },
       });
 
