@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('@middlewares/validate.middleware');
 const mailController = require('../controllers/mail.controller');
-const { authenticate } = require('@modules/auth/middlewares/auth.middleware');
+const { authenticate } = require('@middlewares/authenticate.middleware');
 const { sendTestEmailSchema, sendEmailSchema } = require('../validators/mail.validator');
 
 const router = express.Router();

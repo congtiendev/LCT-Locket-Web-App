@@ -10,7 +10,7 @@ const {
   validateSendFriendRequest,
   validateFriendRequestId,
 } = require('../validators/friend.validator');
-const authenticate = require('@middlewares/authenticate.middleware');
+const { authenticate } = require('@middlewares/authenticate.middleware');
 
 /**
  * Friend Routes
