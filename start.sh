@@ -6,10 +6,14 @@ echo "🚀 Starting LCT Locket Web App..."
 echo "🔄 Generating Prisma Client..."
 npx prisma generate
 
-# Run database migrations and schema deployment
-echo "📦 Running database migrations..."
+# Run database migrations to create tables
+echo "📦 Running Prisma migrations..."
+npx prisma migrate deploy
+
+# Run additional deployment scripts
+echo "🔧 Running deployment scripts..."
 node scripts/inspect-enums.js 2>/dev/null || echo "⚠️ Enum inspection skipped"
-node scripts/emergency-fix.js
+node scripts/emergency-fix.js 2>/dev/null || echo "⚠️ Emergency fix skipped"
 node scripts/deploy-schema.js 2>/dev/null || echo "⚠️ Deploy schema skipped"
 
 # Seed database if needed (optional)
