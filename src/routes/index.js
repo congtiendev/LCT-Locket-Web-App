@@ -2,6 +2,7 @@ const express = require('express');
 const { authRoutes } = require('@modules/auth');
 const { userRoutes } = require('@modules/user');
 const { mailRoutes } = require('@modules/mail');
+const { photoRoutes } = require('@modules/photos');
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/mail', mailRoutes);
+router.use('/photos', photoRoutes);
 
 module.exports = router;
