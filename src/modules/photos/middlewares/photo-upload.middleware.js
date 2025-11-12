@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const AppException = require('@exceptions/app.exception');
 
@@ -8,9 +9,21 @@ const AppException = require('@exceptions/app.exception');
  * Specific configuration for photo uploads
  */
 
+// Ensure upload directories exist
+const uploadDir = 'uploads/photos';
+const thumbnailDir = 'uploads/photos/thumbnails';
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+if (!fs.existsSync(thumbnailDir)) {
+  fs.mkdirSync(thumbnailDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/photos/');
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
