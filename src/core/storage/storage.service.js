@@ -47,13 +47,14 @@ class StorageService {
     // Upload using driver
     const relativePath = await this.driver.upload({ buffer }, filePath);
 
-    // Return full URL for S3, or relative path for local
+    // Return full URL for S3, or full URL with base for local
     if (storageConfig.driver === 's3') {
       return `https://${storageConfig.aws.bucket}.s3.${storageConfig.aws.region}.amazonaws.com/${relativePath}`;
     }
 
-    // For local storage, return URL path
-    return `/uploads/${relativePath}`;
+    // For local storage, return full URL with base
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    return `${baseUrl}/uploads/${relativePath}`;
   }
 
   /**
