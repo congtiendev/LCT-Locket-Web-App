@@ -1,7 +1,14 @@
 const ValidationException = require('@exceptions/validation.exception');
 
-const validate = (schema) => (req, res, next) => {
-  const { error, value } = schema.validate(req.body, {
+/**
+ * Validate request data (body, query, or params)
+ * @param {Object} schema - Joi schema
+ * @param {string} source - Source of data to validate ('body', 'query', 'params')
+ */
+const validate = (schema, source = 'body') => (req, res, next) => {
+  const data = req[source];
+
+  const { error, value } = schema.validate(data, {
     abortEarly: false,
     stripUnknown: true,
   });
@@ -15,7 +22,7 @@ const validate = (schema) => (req, res, next) => {
     throw new ValidationException('Validation failed', errors);
   }
 
-  req.body = value;
+  req[source] = value;
   next();
 };
 

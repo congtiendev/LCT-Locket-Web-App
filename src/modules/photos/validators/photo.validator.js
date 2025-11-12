@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { validate } = require('@middlewares/validation.middleware');
+const validate = require('@middlewares/validate.middleware');
 
 /**
  * Photo Validators
