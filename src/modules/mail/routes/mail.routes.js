@@ -10,19 +10,9 @@ const router = express.Router();
 router.get('/verify', authenticate, mailController.verifyConnection);
 
 // Send test email
-router.post(
-  '/test',
-  authenticate,
-  validate(sendTestEmailSchema),
-  mailController.sendTestEmail
-);
+router.post('/test', authenticate, validate(sendTestEmailSchema), mailController.sendTestEmail);
 
 // Send custom email
-router.post(
-  '/send',
-  authenticate,
-  validate(sendEmailSchema),
-  mailController.sendEmail
-);
+router.post('/send', authenticate, validate(sendEmailSchema), mailController.sendEmail);
 
 module.exports = router;

@@ -18,13 +18,7 @@ const {
  */
 
 // Photo management routes
-router.post(
-  '/',
-  authenticate,
-  upload.single('photo'),
-  validateUploadPhoto,
-  photoController.upload
-);
+router.post('/', authenticate, upload.single('photo'), validateUploadPhoto, photoController.upload);
 
 router.get('/feed', authenticate, validateGetPhotosQuery, photoController.getFeed);
 

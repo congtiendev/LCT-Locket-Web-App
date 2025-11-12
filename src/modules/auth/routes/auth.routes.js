@@ -1,8 +1,8 @@
 const express = require('express');
 const validate = require('@middlewares/validate.middleware');
+const { authenticate } = require('@middlewares/authenticate.middleware');
 const authController = require('../controllers/auth.controller');
 const passwordController = require('../controllers/password.controller');
-const { authenticate } = require('../middlewares/auth.middleware');
 const googleAuthRoutes = require('./google-auth.routes');
 const {
   registerSchema,
