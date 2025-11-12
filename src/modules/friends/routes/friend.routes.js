@@ -41,11 +41,7 @@ router.get(
   validateGetFriendRequestsQuery,
   friendRequestController.getSentRequests
 );
-router.post(
-  '/friend-requests',
-  validateSendFriendRequest,
-  friendRequestController.sendRequest
-);
+router.post('/friend-requests', validateSendFriendRequest, friendRequestController.sendRequest);
 router.post(
   '/friend-requests/:id/accept',
   validateFriendRequestId,
