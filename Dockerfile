@@ -19,7 +19,7 @@ RUN npm ci --only=production && npm cache clean --force
 COPY . .
 
 # Create required directories
-RUN mkdir -p uploads logs
+RUN mkdir -p uploads/photos/thumbnails logs
 
 # Set appropriate permissions
 RUN chmod +x start.sh 2>/dev/null || echo "start.sh not found, will use CMD fallback"
