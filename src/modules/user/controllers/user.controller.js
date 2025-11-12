@@ -51,6 +51,34 @@ class UserController {
       next(error);
     }
   }
+
+  /**
+   * Search users
+   * GET /api/users/search?q=query
+   */
+  async searchUsers(req, res, next) {
+    try {
+      const { q, limit, offset } = req.query;
+      const result = await userService.searchUsers(q, { limit, offset });
+      return successResponse(res, result, 'Users found', HTTP_STATUS.OK);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get user profile by ID
+   * GET /api/users/:id/profile
+   */
+  async getUserProfile(req, res, next) {
+    try {
+      const { id } = req.params;
+      const profile = await userService.getUserProfile(id);
+      return successResponse(res, profile, 'User profile retrieved', HTTP_STATUS.OK);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new UserController();

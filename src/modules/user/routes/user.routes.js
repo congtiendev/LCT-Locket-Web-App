@@ -8,11 +8,13 @@ const {
   createUserSchema,
   updateUserSchema,
   updateProfileSchema,
+  searchUsersQuerySchema,
+  userIdParamSchema,
 } = require('../validators/user.validator');
 
 const router = express.Router();
 
-// Profile routes
+// Profile routes (legacy)
 router.get('/profile', authenticate, profileController.getProfile);
 router.put(
   '/profile',
@@ -25,6 +27,29 @@ router.post(
   authenticate,
   upload.single('avatar'),
   profileController.uploadAvatar
+);
+
+// Profile routes (new API format)
+router.get('/me', authenticate, profileController.getProfile);
+router.patch(
+  '/me',
+  authenticate,
+  validate(updateProfileSchema),
+  profileController.updateProfile
+);
+
+// Public user routes (authenticated)
+router.get(
+  '/search',
+  authenticate,
+  validate(searchUsersQuerySchema, 'query'),
+  userController.searchUsers
+);
+router.get(
+  '/:id/profile',
+  authenticate,
+  validate(userIdParamSchema, 'params'),
+  userController.getUserProfile
 );
 
 // User management routes (Admin only)

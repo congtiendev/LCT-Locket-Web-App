@@ -23,7 +23,23 @@ app.set('trust proxy', 1);
 
 // Security middlewares
 app.use(helmet());
-app.use(cors());
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://congtiendev-locket-web.figma.site',
+    'https://lct-locket-web-app.onrender.com',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean), // Remove undefined values
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-refresh-token'],
+  exposedHeaders: ['x-access-token', 'x-refresh-token'],
+};
+
+app.use(cors(corsOptions));
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
@@ -45,8 +61,18 @@ app.use(morganMiddleware);
 // Rate limiting
 app.use('/api/', apiLimiter);
 
-// Static files
-app.use('/uploads', express.static('uploads'));
+// Static files with CORS headers
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  },
+  express.static('uploads')
+);
+
 app.use('/public', express.static('public'));
 
 // Root health check

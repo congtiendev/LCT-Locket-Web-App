@@ -63,6 +63,34 @@ class UserRepository {
       where: { id },
     });
   }
+
+  /**
+   * Search users by name, username, or email
+   */
+  async searchUsers(query, { limit = 20, offset = 0 }) {
+    return prisma.user.findMany({
+      where: {
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { username: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } },
+        ],
+        status: 'ACTIVE', // Only search active users
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        avatar: true,
+        bio: true,
+      },
+      take: limit,
+      skip: offset,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
 }
 
 module.exports = new UserRepository();

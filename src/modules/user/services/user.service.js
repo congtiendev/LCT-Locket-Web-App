@@ -98,6 +98,53 @@ class UserService {
 
     await userRepository.delete(id);
   }
+
+  /**
+   * Search users (public)
+   */
+  async searchUsers(query, { limit = 20, offset = 0 }) {
+    if (!query || query.length < 2) {
+      throw new AppException('Search query must be at least 2 characters', 400);
+    }
+
+    const users = await userRepository.searchUsers(query, { limit, offset });
+
+    return {
+      users: users.map((user) => ({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        avatar: user.avatar,
+        bio: user.bio,
+      })),
+      pagination: {
+        limit,
+        offset,
+        has_more: users.length === limit,
+      },
+    };
+  }
+
+  /**
+   * Get user profile by ID (public)
+   */
+  async getUserProfile(id) {
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+      throw new AppException('User not found', 404);
+    }
+
+    // Return public profile data only
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      avatar: user.avatar,
+      bio: user.bio,
+      created_at: user.createdAt,
+    };
+  }
 }
 
 module.exports = new UserService();
