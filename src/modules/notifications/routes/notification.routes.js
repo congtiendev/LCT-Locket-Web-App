@@ -5,7 +5,7 @@ const {
   validateGetNotificationsQuery,
   validateNotificationId,
 } = require('../validators/notification.validator');
-const authenticate = require('@middlewares/authenticate.middleware');
+const { authenticate } = require('@middlewares/authenticate.middleware');
 
 /**
  * Notification Routes

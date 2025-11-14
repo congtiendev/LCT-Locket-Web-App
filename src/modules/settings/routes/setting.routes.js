@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const settingController = require('../controllers/setting.controller');
 const { validateUpdateSettings } = require('../validators/setting.validator');
-const authenticate = require('@middlewares/authenticate.middleware');
+const { authenticate } = require('@middlewares/authenticate.middleware');
 
 /**
  * Setting Routes
