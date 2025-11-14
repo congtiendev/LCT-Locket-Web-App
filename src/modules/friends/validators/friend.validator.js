@@ -10,7 +10,7 @@ const validate = require('@middlewares/validate.middleware');
  * Get friends query validation
  */
 const getFriendsQuerySchema = Joi.object({
-  limit: Joi.number().integer().min(1).max(50).default(20),
+  limit: Joi.number().integer().min(1).max(100).default(20),
   offset: Joi.number().integer().min(0).default(0),
 });
 
@@ -33,7 +33,7 @@ const updateFriendSettingsSchema = Joi.object({
  * Friend request query validation
  */
 const getFriendRequestsQuerySchema = Joi.object({
-  limit: Joi.number().integer().min(1).max(50).default(20),
+  limit: Joi.number().integer().min(1).max(100).default(20),
   offset: Joi.number().integer().min(0).default(0),
   status: Joi.string().valid('pending', 'accepted', 'rejected').default('pending'),
 });
