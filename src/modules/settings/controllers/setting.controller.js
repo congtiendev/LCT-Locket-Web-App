@@ -1,5 +1,4 @@
 const settingService = require('../services/setting.service');
-const asyncHandler = require('@middlewares/async-handler.middleware');
 
 /**
  * Setting Controller
@@ -10,33 +9,41 @@ class SettingController {
    * Get user settings
    * GET /api/settings
    */
-  getSettings = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+  async getSettings(req, res, next) {
+    try {
+      const userId = req.user.id;
 
-    const settings = await settingService.getSettings(userId);
+      const settings = await settingService.getSettings(userId);
 
-    res.json({
-      success: true,
-      data: settings,
-    });
-  });
+      res.json({
+        success: true,
+        data: settings,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 
   /**
    * Update user settings
    * PATCH /api/settings
    */
-  updateSettings = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const data = req.body;
+  async updateSettings(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const data = req.body;
 
-    const settings = await settingService.updateSettings(userId, data);
+      const settings = await settingService.updateSettings(userId, data);
 
-    res.json({
-      success: true,
-      data: settings,
-      message: 'Settings updated successfully',
-    });
-  });
+      res.json({
+        success: true,
+        data: settings,
+        message: 'Settings updated successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new SettingController();
