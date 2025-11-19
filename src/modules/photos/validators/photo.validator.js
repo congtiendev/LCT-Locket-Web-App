@@ -32,13 +32,38 @@ const photoIdSchema = Joi.object({
 
 /**
  * Add reaction validation
+ * Supports both emoji Unicode and text shortcuts
  */
 const addReactionSchema = Joi.object({
   emoji: Joi.string()
     .required()
-    .valid('❤️', '😂', '😮', '🔥', '✨', '👍', '🎉', '😍', '💯', '🙌')
+    .valid(
+      // Emoji Unicode
+      '❤️',
+      '😂',
+      '😮',
+      '🔥',
+      '✨',
+      '👍',
+      '🎉',
+      '😍',
+      '💯',
+      '🙌',
+      // Text shortcuts
+      'heart',
+      'laugh',
+      'wow',
+      'fire',
+      'sparkles',
+      'thumbsup',
+      'party',
+      'love',
+      'hundred',
+      'hands'
+    )
     .messages({
-      'any.only': 'Invalid emoji. Allowed emojis: ❤️ 😂 😮 🔥 ✨ 👍 🎉 😍 💯 🙌',
+      'any.only':
+        'Invalid emoji. Allowed: ❤️ (heart), 😂 (laugh), 😮 (wow), 🔥 (fire), ✨ (sparkles), 👍 (thumbsup), 🎉 (party), 😍 (love), 💯 (hundred), 🙌 (hands)',
     }),
 });
 

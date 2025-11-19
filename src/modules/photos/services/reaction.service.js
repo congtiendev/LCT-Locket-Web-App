@@ -14,11 +14,42 @@ class ReactionService {
   ALLOWED_EMOJIS = ['❤️', '😂', '😮', '🔥', '✨', '👍', '🎉', '😍', '💯', '🙌'];
 
   /**
+   * Emoji text shortcuts mapping
+   */
+  EMOJI_SHORTCUTS = {
+    heart: '❤️',
+    laugh: '😂',
+    wow: '😮',
+    fire: '🔥',
+    sparkles: '✨',
+    thumbsup: '👍',
+    party: '🎉',
+    love: '😍',
+    hundred: '💯',
+    hands: '🙌',
+  };
+
+  /**
+   * Convert text shortcut to emoji Unicode
+   */
+  normalizeEmoji(emoji) {
+    // If it's a text shortcut, convert to Unicode
+    if (this.EMOJI_SHORTCUTS[emoji]) {
+      return this.EMOJI_SHORTCUTS[emoji];
+    }
+    // Otherwise return as-is (already Unicode emoji)
+    return emoji;
+  }
+
+  /**
    * Add or update reaction
    */
   async addReaction(photoId, userId, emoji) {
+    // Normalize emoji (convert text shortcuts to Unicode)
+    const normalizedEmoji = this.normalizeEmoji(emoji);
+
     // Validate emoji
-    if (!this.ALLOWED_EMOJIS.includes(emoji)) {
+    if (!this.ALLOWED_EMOJIS.includes(normalizedEmoji)) {
       throw new AppException(
         `Invalid emoji. Allowed emojis: ${this.ALLOWED_EMOJIS.join(', ')}`,
         400
@@ -39,10 +70,10 @@ class ReactionService {
       }
     }
 
-    // Upsert reaction
-    const reaction = await reactionRepository.upsertReaction(photoId, userId, emoji);
+    // Upsert reaction with normalized emoji
+    const reaction = await reactionRepository.upsertReaction(photoId, userId, normalizedEmoji);
 
-    logger.info(`Reaction added: ${emoji} on photo ${photoId} by user ${userId}`);
+    logger.info(`Reaction added: ${normalizedEmoji} on photo ${photoId} by user ${userId}`);
 
     return {
       id: reaction.id,
