@@ -22,7 +22,11 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security middlewares
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
 // CORS configuration
 const corsOptions = {
