@@ -89,7 +89,7 @@ class PhotoRepository {
   }
 
   /**
-   * Find feed photos (from friends)
+   * Find feed photos (from friends and self)
    */
   async findFeedPhotos(userId, { limit = 20, offset = 0, order = 'desc', friendId = null }) {
     // First, get user's friends
@@ -100,8 +100,10 @@ class PhotoRepository {
 
     const friendIds = friendships.map((f) => f.friendId);
 
-    // Filter by specific friend if provided
-    const userFilter = friendId ? { userId: friendId } : { userId: { in: friendIds } };
+    // Filter by specific friend if provided, otherwise include user and friends
+    const userFilter = friendId
+      ? { userId: friendId }
+      : { userId: { in: [...friendIds, userId] } };
 
     return await prisma.photo.findMany({
       where: {
@@ -148,7 +150,9 @@ class PhotoRepository {
     });
 
     const friendIds = friendships.map((f) => f.friendId);
-    const userFilter = friendId ? { userId: friendId } : { userId: { in: friendIds } };
+    const userFilter = friendId
+      ? { userId: friendId }
+      : { userId: { in: [...friendIds, userId] } };
 
     return await prisma.photo.count({
       where: {
