@@ -32,9 +32,8 @@ class GoogleAuthController {
       const { password, ...userWithoutPassword } = user;
 
       // Redirect to frontend with tokens
-      // For production, redirect to your frontend with tokens in URL params or set as cookies
       const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const redirectURL = `${frontendURL}/auth/google/success?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
+      const redirectURL = `${frontendURL}/auth/google/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
 
       return res.redirect(redirectURL);
     } catch (error) {
@@ -50,7 +49,8 @@ class GoogleAuthController {
     logger.error('Google OAuth authentication failed');
 
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const redirectURL = `${frontendURL}/auth/google/failure`;
+    const errorMessage = encodeURIComponent('Authentication failed');
+    const redirectURL = `${frontendURL}/auth/google/callback?error=${errorMessage}`;
 
     return res.redirect(redirectURL);
   }
