@@ -17,9 +17,21 @@ class PhotoSocketHandler {
    */
   emitPhotoUploaded(userId, friendIds, photoData) {
     try {
+      // Check connected sockets
+      const connectedSockets = this.io.sockets.sockets.size;
+      logger.info(`📊 Total connected sockets: ${connectedSockets}`);
+
       // Emit to each friend
       friendIds.forEach((friendId) => {
-        this.io.to(`user:${friendId}`).emit('photo:uploaded', {
+        const roomName = `user:${friendId}`;
+        const roomSockets = this.io.sockets.adapter.rooms.get(roomName);
+        const socketCount = roomSockets ? roomSockets.size : 0;
+
+        logger.info(
+          `📤 Emitting to room ${roomName} (${socketCount} socket${socketCount !== 1 ? 's' : ''})`
+        );
+
+        this.io.to(roomName).emit('photo:uploaded', {
           type: 'photo:uploaded',
           data: {
             photo: photoData,
