@@ -1,5 +1,8 @@
 const photoViewService = require('../services/photo-view.service');
 const logger = require('@utils/logger');
+const socketConfig = require('@config/socket.config');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 /**
  * Photo View Controller
@@ -16,6 +19,23 @@ class PhotoViewController {
       const { photoId } = req.params;
 
       const result = await photoViewService.recordView(photoId, userId);
+
+      // Emit real-time event to photo owner
+      try {
+        const photo = await prisma.photo.findUnique({
+          where: { id: photoId },
+          select: { userId: true },
+        });
+
+        if (photo && photo.userId !== userId) {
+          const io = socketConfig.getIO();
+          if (io.photoHandler) {
+            io.photoHandler.emitPhotoView(photoId, photo.userId, result);
+          }
+        }
+      } catch (socketError) {
+        logger.error('Failed to emit view event:', socketError);
+      }
 
       res.status(201).json({
         success: true,

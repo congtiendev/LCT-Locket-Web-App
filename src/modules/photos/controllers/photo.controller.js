@@ -2,6 +2,9 @@ const photoService = require('../services/photo.service');
 const { successResponse, errorResponse } = require('@utils/response');
 const HTTP_STATUS = require('@constants/http-status');
 const logger = require('@utils/logger');
+const socketConfig = require('@config/socket.config');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 /**
  * Photo Controller
@@ -23,6 +26,27 @@ class PhotoController {
       }
 
       const photo = await photoService.uploadPhoto(userId, file, caption);
+
+      // Emit real-time event to friends
+      try {
+        // Get user's friends
+        const friendships = await prisma.friendship.findMany({
+          where: { userId },
+          select: { friendId: true },
+        });
+        const friendIds = friendships.map((f) => f.friendId);
+
+        // Emit to Socket.IO
+        if (friendIds.length > 0) {
+          const io = socketConfig.getIO();
+          if (io.photoHandler) {
+            io.photoHandler.emitPhotoUploaded(userId, friendIds, photo);
+          }
+        }
+      } catch (socketError) {
+        // Don't fail the request if socket emission fails
+        logger.error('Failed to emit photo upload event:', socketError);
+      }
 
       return successResponse(res, photo, 'Photo uploaded successfully', HTTP_STATUS.CREATED);
     } catch (error) {

@@ -2,6 +2,9 @@ const reactionService = require('../services/reaction.service');
 const { successResponse, errorResponse } = require('@utils/response');
 const HTTP_STATUS = require('@constants/http-status');
 const logger = require('@utils/logger');
+const socketConfig = require('@config/socket.config');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 /**
  * Reaction Controller
@@ -24,6 +27,24 @@ class ReactionController {
 
       const reaction = await reactionService.addReaction(photoId, userId, emoji);
 
+      // Emit real-time event
+      try {
+        // Get photo owner
+        const photo = await prisma.photo.findUnique({
+          where: { id: photoId },
+          select: { userId: true },
+        });
+
+        if (photo && photo.userId !== userId) {
+          const io = socketConfig.getIO();
+          if (io.photoHandler) {
+            io.photoHandler.emitPhotoReaction(photoId, photo.userId, reaction);
+          }
+        }
+      } catch (socketError) {
+        logger.error('Failed to emit reaction event:', socketError);
+      }
+
       return successResponse(res, reaction, 'Reaction added successfully');
     } catch (error) {
       logger.error('Add reaction error:', error);
@@ -41,6 +62,24 @@ class ReactionController {
       const userId = req.user.id;
 
       const result = await reactionService.removeReaction(photoId, userId);
+
+      // Emit real-time event
+      try {
+        // Get photo owner
+        const photo = await prisma.photo.findUnique({
+          where: { id: photoId },
+          select: { userId: true },
+        });
+
+        if (photo && photo.userId !== userId) {
+          const io = socketConfig.getIO();
+          if (io.photoHandler) {
+            io.photoHandler.emitPhotoReactionRemoved(photoId, photo.userId, userId);
+          }
+        }
+      } catch (socketError) {
+        logger.error('Failed to emit reaction removed event:', socketError);
+      }
 
       return successResponse(res, result, 'Reaction removed successfully');
     } catch (error) {

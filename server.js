@@ -4,6 +4,10 @@ const app = require('./src/app');
 const logger = require('./src/shared/utils/logger');
 const config = require('./src/config');
 
+// Import Socket.IO
+const socketConfig = require('./src/config/socket.config');
+const { initializeSocket } = require('./src/socket');
+
 // Import queue processors
 const { emailQueue, notificationQueue } = require('./src/core/queue/bull.config');
 const processEmail = require('./src/core/queue/processors/email.processor');
@@ -29,6 +33,11 @@ const server = app.listen(PORT, () => {
   logger.info(`App name: ${config.app.appName}`);
   logger.info(`App URL: ${config.app.appUrl}`);
 });
+
+// Initialize Socket.IO
+const io = socketConfig.init(server);
+initializeSocket(io);
+logger.info('Socket.IO initialized and ready');
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
