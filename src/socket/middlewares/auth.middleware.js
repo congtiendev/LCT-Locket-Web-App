@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const config = require('@config');
 const logger = require('@utils/logger');
 
 /**
@@ -24,9 +23,8 @@ const socketAuthMiddleware = async (socket, next) => {
       return next(new Error('Authentication error: No token provided'));
     }
 
-    // Verify token
-    logger.info(`  - Verifying with secret: ${config.jwt.accessTokenSecret?.substring(0, 10)}...`);
-    const decoded = jwt.verify(token, config.jwt.accessTokenSecret);
+    // Verify token (use same secret as HTTP authentication)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     logger.info('✅ Token decoded successfully:');
     logger.info(`  - userId: ${decoded.userId}`);
