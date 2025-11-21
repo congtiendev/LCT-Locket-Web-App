@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const settingController = require('../controllers/setting.controller');
+const migrationController = require('../controllers/migration.controller');
 const {
   validateUpdateSettings,
   validateUpdateProfile,
   validateDeleteAccount
 } = require('../validators/setting.validator');
-const { authenticate } = require('@middlewares/authenticate.middleware');
+const { authenticate, authorize } = require('@middlewares/authenticate.middleware');
 const avatarUpload = require('@middlewares/avatar-upload.middleware');
 
 /**
@@ -14,7 +15,10 @@ const avatarUpload = require('@middlewares/avatar-upload.middleware');
  * All routes require authentication
  */
 
-// Apply authentication to all routes
+// Migration endpoint (Admin only, no auth required for emergency)
+router.post('/migrate/settings', migrationController.migrateSettings);
+
+// Apply authentication to all other routes
 router.use(authenticate);
 
 // User settings routes
