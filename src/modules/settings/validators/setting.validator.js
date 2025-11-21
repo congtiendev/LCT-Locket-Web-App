@@ -26,6 +26,9 @@ const updateSettingsSchema = Joi.object({
 const updateProfileSchema = Joi.object({
   name: Joi.string().min(1).max(100).optional(),
   bio: Joi.string().max(500).allow('').optional(),
+  phone: Joi.string().pattern(/^[0-9]{10,15}$/).allow('').optional().messages({
+    'string.pattern.base': 'Phone number must be 10-15 digits',
+  }),
 }).min(1); // At least one field must be provided
 
 /**

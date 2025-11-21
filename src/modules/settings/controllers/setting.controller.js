@@ -89,7 +89,7 @@ class SettingController {
   async updateProfile(req, res, next) {
     try {
       const userId = req.user.id;
-      const { name, bio } = req.body;
+      const { name, bio, phone } = req.body;
 
       const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
@@ -97,6 +97,7 @@ class SettingController {
       const updateData = {};
       if (name !== undefined) updateData.name = name;
       if (bio !== undefined) updateData.bio = bio;
+      if (phone !== undefined) updateData.phone = phone;
 
       const user = await prisma.user.update({
         where: { id: userId },
@@ -106,6 +107,7 @@ class SettingController {
           email: true,
           name: true,
           bio: true,
+          phone: true,
           avatar: true,
           username: true,
           createdAt: true,
@@ -120,6 +122,7 @@ class SettingController {
           email: user.email,
           name: user.name,
           bio: user.bio,
+          phone: user.phone,
           avatar_url: user.avatar,
           username: user.username,
           created_at: user.createdAt,
