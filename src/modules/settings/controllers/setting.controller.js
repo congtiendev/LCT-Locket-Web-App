@@ -66,15 +66,19 @@ class SettingController {
       // Update user avatar in database
       const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
+      const { app } = require('@config');
 
       await prisma.user.update({
         where: { id: userId },
         data: { avatar: avatarUrl },
       });
 
+      // Return full URL
+      const fullAvatarUrl = `${app.appUrl}${avatarUrl}`;
+
       res.json({
         success: true,
-        avatar_url: avatarUrl,
+        avatar_url: fullAvatarUrl,
         message: 'Avatar updated successfully',
       });
     } catch (error) {
@@ -93,6 +97,7 @@ class SettingController {
 
       const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
+      const { app } = require('@config');
 
       const updateData = {};
       if (name !== undefined) updateData.name = name;
@@ -115,6 +120,12 @@ class SettingController {
         },
       });
 
+      // Transform avatar to full URL
+      let avatarUrl = user.avatar;
+      if (avatarUrl && !avatarUrl.startsWith('http')) {
+        avatarUrl = `${app.appUrl}${avatarUrl}`;
+      }
+
       res.json({
         success: true,
         user: {
@@ -123,7 +134,7 @@ class SettingController {
           name: user.name,
           bio: user.bio,
           phone: user.phone,
-          avatar_url: user.avatar,
+          avatar_url: avatarUrl,
           username: user.username,
           created_at: user.createdAt,
           updated_at: user.updatedAt,
