@@ -19,6 +19,7 @@
     "prisma:migrate:prod": "prisma migrate deploy",
     "migrate:force": "node scripts/migrate-production.js",
     "migrate:force-columns": "node scripts/force-migration.js",
+    "migrate:settings": "node scripts/add-settings-columns.js",
     "check:db": "node scripts/check-db-structure.js",
     "migrate:reset": "node scripts/reset-and-migrate.js",
     "db:emergency-fix": "node scripts/emergency-fix.js",
