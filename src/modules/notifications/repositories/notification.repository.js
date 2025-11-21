@@ -128,13 +128,14 @@ class NotificationRepository {
   /**
    * Create photo reaction notification
    */
-  async createPhotoReactionNotification(photoOwnerId, reactorId, photoId, emoji) {
+  async createPhotoReactionNotification(photoOwnerId, reactorId, photoId, emoji, reactorInfo) {
     return await this.create(
       photoOwnerId,
-      'photo_reaction',
+      'reaction',
       {
         message: `reacted ${emoji} to your photo`,
         emoji,
+        reactor: reactorInfo,
       },
       reactorId,
       photoId

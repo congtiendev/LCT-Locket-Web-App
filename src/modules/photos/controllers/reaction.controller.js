@@ -1,4 +1,5 @@
 const reactionService = require('../services/reaction.service');
+const notificationRepository = require('@modules/notifications/repositories/notification.repository');
 const { successResponse, errorResponse } = require('@utils/response');
 const HTTP_STATUS = require('@constants/http-status');
 const logger = require('@utils/logger');
@@ -27,22 +28,42 @@ class ReactionController {
 
       const reaction = await reactionService.addReaction(photoId, userId, emoji);
 
-      // Emit real-time event
+      // Get photo owner and reactor info for notifications
       try {
-        // Get photo owner
-        const photo = await prisma.photo.findUnique({
-          where: { id: photoId },
-          select: { userId: true },
-        });
+        const [photo, reactor] = await Promise.all([
+          prisma.photo.findUnique({
+            where: { id: photoId },
+            select: { userId: true },
+          }),
+          prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, name: true, username: true, avatar: true },
+          }),
+        ]);
 
         if (photo && photo.userId !== userId) {
+          // Create notification
+          await notificationRepository.createPhotoReactionNotification(
+            photo.userId,
+            userId,
+            photoId,
+            reaction.emoji,
+            reactor
+          );
+
+          // Emit real-time socket event
           const io = socketConfig.getIO();
           if (io.photoHandler) {
-            io.photoHandler.emitPhotoReaction(photoId, photo.userId, reaction);
+            io.photoHandler.emitPhotoReaction(photoId, photo.userId, {
+              ...reaction,
+              user: reactor,
+            });
           }
+
+          logger.info(`Notification created: User ${userId} reacted to photo ${photoId}`);
         }
-      } catch (socketError) {
-        logger.error('Failed to emit reaction event:', socketError);
+      } catch (notificationError) {
+        logger.error('Failed to create notification/emit event:', notificationError);
       }
 
       return successResponse(res, reaction, 'Reaction added successfully');

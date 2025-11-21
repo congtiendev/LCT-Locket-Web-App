@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Test Client</title>
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; }
+    .status {
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .connected { background: #d4edda; color: #155724; }
+    .disconnected { background: #f8d7da; color: #721c24; }
+    .log {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 15px;
+      border-radius: 5px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    .event-photo { background: #e3f2fd; padding: 10px; margin: 5px 0; border-left: 3px solid #2196f3; }
+    .event-reaction { background: #fff3e0; padding: 10px; margin: 5px 0; border-left: 3px solid #ff9800; }
+    .event-view { background: #f3e5f5; padding: 10px; margin: 5px 0; border-left: 3px solid #9c27b0; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .info {
+      background: #e7f3ff;
+      padding: 15px;
+      border-left: 4px solid #007bff;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔴 Socket.IO Test Client</h1>
+
+    <div class="info">
+      <strong>Instructions:</strong>
+      <ol>
+        <li>Login to your app and copy your access token</li>
+        <li>Paste token below and click Connect</li>
+        <li>Upload a photo from another account</li>
+        <li>Watch for real-time events below!</li>
+      </ol>
+    </div>
+
+    <label for="tokenInput"><strong>Access Token:</strong></label>
+    <input
+      type="text"
+      id="tokenInput"
+      placeholder="Paste your JWT access token here..."
+    />
+
+    <label for="serverUrl"><strong>Server URL:</strong></label>
+    <input
+      type="text"
+      id="serverUrl"
+      value="http://localhost:5000"
+      placeholder="http://localhost:5000"
+    />
+
+    <button onclick="connectSocket()">Connect to Socket.IO</button>
+    <button onclick="clearLogs()" style="background: #dc3545; margin-left: 10px;">Clear Logs</button>
+
+    <div id="status" class="status disconnected">
+      ❌ Disconnected
+    </div>
+
+    <h3>📝 Event Logs:</h3>
+    <div id="logs" class="log">
+      <div class="log-entry">Waiting for connection...</div>
+    </div>
+  </div>
+
+  <script>
+    let socket = null;
+
+    function addLog(message, type = 'info') {
+      const logsDiv = document.getElementById('logs');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+
+      const timestamp = new Date().toLocaleTimeString();
+      entry.innerHTML = `[${timestamp}] ${message}`;
+
+      if (logsDiv.firstChild.textContent === 'Waiting for connection...') {
+        logsDiv.innerHTML = '';
+      }
+
+      logsDiv.appendChild(entry);
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+
+    function updateStatus(connected) {
+      const statusDiv = document.getElementById('status');
+      if (connected) {
+        statusDiv.className = 'status connected';
+        statusDiv.textContent = '✅ Connected';
+      } else {
+        statusDiv.className = 'status disconnected';
+        statusDiv.textContent = '❌ Disconnected';
+      }
+    }
+
+    function connectSocket() {
+      const token = document.getElementById('tokenInput').value.trim();
+      const serverUrl = document.getElementById('serverUrl').value.trim();
+
+      if (!token) {
+        alert('Please enter your access token!');
+        return;
+      }
+
+      if (socket) {
+        socket.close();
+      }
+
+      addLog('🔄 Connecting to ' + serverUrl + '...');
+
+      socket = io(serverUrl, {
+        auth: {
+          token: token
+        },
+        transports: ['websocket', 'polling']
+      });
+
+      socket.on('connect', () => {
+        addLog('✅ <strong>Connected!</strong> Socket ID: ' + socket.id, 'success');
+        updateStatus(true);
+      });
+
+      socket.on('disconnect', (reason) => {
+        addLog('❌ <strong>Disconnected:</strong> ' + reason, 'error');
+        updateStatus(false);
+      });
+
+      socket.on('connect_error', (error) => {
+        addLog('🔴 <strong>Connection Error:</strong> ' + error.message, 'error');
+        updateStatus(false);
+      });
+
+      // Photo uploaded event
+      socket.on('photo:uploaded', (data) => {
+        addLog(
+          '<div class="event-photo">' +
+          '<strong>📸 NEW PHOTO UPLOADED!</strong><br>' +
+          'Photo ID: ' + data.data.photo.id + '<br>' +
+          'Uploaded by: ' + data.data.uploaded_by + '<br>' +
+          'Caption: ' + (data.data.photo.caption || 'No caption') + '<br>' +
+          'Image: <img src="' + data.data.photo.image_url + '" style="max-width: 200px; border-radius: 5px; margin-top: 5px;">' +
+          '</div>'
+        );
+
+        // Play sound
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBiuHzPLTgjo=');
+        audio.play();
+      });
+
+      // Photo reaction event
+      socket.on('photo:reaction', (data) => {
+        addLog(
+          '<div class="event-reaction">' +
+          '<strong>❤️ SOMEONE REACTED TO YOUR PHOTO!</strong><br>' +
+          'Photo ID: ' + data.data.photo_id + '<br>' +
+          'Emoji: ' + data.data.reaction.emoji + '<br>' +
+          'User: ' + data.data.reaction.user_id +
+          '</div>'
+        );
+      });
+
+      // Photo reaction updated (live updates)
+      socket.on('photo:reaction:updated', (data) => {
+        if (data.data.removed) {
+          addLog(
+            '<div class="event-reaction">' +
+            '<strong>❌ REACTION REMOVED</strong><br>' +
+            'Photo ID: ' + data.data.photo_id + '<br>' +
+            'User: ' + data.data.user_id +
+            '</div>'
+          );
+        } else {
+          addLog(
+            '<div class="event-reaction">' +
+            '<strong>⚡ REACTION UPDATED</strong><br>' +
+            'Photo ID: ' + data.data.photo_id + '<br>' +
+            'Emoji: ' + data.data.reaction.emoji +
+            '</div>'
+          );
+        }
+      });
+
+      // Photo viewed event
+      socket.on('photo:viewed', (data) => {
+        addLog(
+          '<div class="event-view">' +
+          '<strong>👁️ SOMEONE VIEWED YOUR PHOTO!</strong><br>' +
+          'Photo ID: ' + data.data.photo_id + '<br>' +
+          'Viewer: ' + data.data.view.user_id +
+          '</div>'
+        );
+      });
+
+      // Generic error handler
+      socket.on('error', (error) => {
+        addLog('⚠️ <strong>Socket Error:</strong> ' + error, 'error');
+      });
+    }
+
+    function clearLogs() {
+      document.getElementById('logs').innerHTML = '<div class="log-entry">Logs cleared.</div>';
+    }
+  </script>
+</body>
+</html>
