@@ -143,6 +143,56 @@ class PhotoSocketHandler {
       logger.error('Error emitting photo view event:', error);
     }
   }
+
+  /**
+   * Emit photo deleted event
+   * @param {string} photoId - Photo ID
+   * @param {string} userId - User who deleted the photo
+   * @param {Array} friendIds - Array of friend user IDs who should be notified
+   */
+  emitPhotoDeleted(photoId, userId, friendIds) {
+    try {
+      // Check connected sockets
+      const connectedSockets = this.io.sockets.sockets.size;
+      logger.info(`📊 Total connected sockets: ${connectedSockets}`);
+
+      // Emit to each friend who might have this photo in their feed
+      friendIds.forEach((friendId) => {
+        const roomName = `user:${friendId}`;
+        const roomSockets = this.io.sockets.adapter.rooms.get(roomName);
+        const socketCount = roomSockets ? roomSockets.size : 0;
+
+        logger.info(
+          `📤 Emitting photo deletion to room ${roomName} (${socketCount} socket${socketCount !== 1 ? 's' : ''})`
+        );
+
+        this.io.to(roomName).emit('photo:deleted', {
+          type: 'photo:deleted',
+          data: {
+            photo_id: photoId,
+            deleted_by: userId,
+          },
+          timestamp: new Date().toISOString(),
+        });
+      });
+
+      // Also emit to anyone viewing this specific photo
+      this.io.to(`photo:${photoId}`).emit('photo:deleted', {
+        type: 'photo:deleted',
+        data: {
+          photo_id: photoId,
+          deleted_by: userId,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      logger.info(
+        `Photo deleted event emitted: Photo ${photoId} by user ${userId} to ${friendIds.length} friends`
+      );
+    } catch (error) {
+      logger.error('Error emitting photo deleted event:', error);
+    }
+  }
 }
 
 module.exports = PhotoSocketHandler;

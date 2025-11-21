@@ -129,6 +129,27 @@ class PhotoController {
 
       const result = await photoService.deletePhoto(photoId, userId);
 
+      // Emit real-time event to friends
+      try {
+        // Get user's friends
+        const friendships = await prisma.friendship.findMany({
+          where: { userId },
+          select: { friendId: true },
+        });
+        const friendIds = friendships.map((f) => f.friendId);
+
+        // Emit to Socket.IO
+        if (friendIds.length > 0) {
+          const io = socketConfig.getIO();
+          if (io.photoHandler) {
+            io.photoHandler.emitPhotoDeleted(photoId, userId, friendIds);
+          }
+        }
+      } catch (socketError) {
+        // Don't fail the request if socket emission fails
+        logger.error('Failed to emit photo deletion event:', socketError);
+      }
+
       return successResponse(res, result, 'Photo deleted successfully');
     } catch (error) {
       logger.error('Delete photo error:', error);
