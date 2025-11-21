@@ -9,11 +9,13 @@ Hệ thống sử dụng Socket.IO để cung cấp các tính năng real-time. 
 ## 📡 Socket Rooms
 
 ### User Rooms
+
 - **Format**: `user:{userId}`
 - **Purpose**: Nhận các events liên quan đến user cụ thể
 - **Auto-join**: User tự động join vào room của mình khi connect
 
 ### Photo Rooms
+
 - **Format**: `photo:{photoId}`
 - **Purpose**: Nhận real-time updates khi đang xem một photo cụ thể
 - **Manual-join**: Frontend join khi user xem photo, leave khi rời khỏi photo
@@ -29,6 +31,7 @@ Hệ thống sử dụng Socket.IO để cung cấp các tính năng real-time. 
 **Emit to**: `user:{friendId}` (tất cả friends)
 
 **Event data structure**:
+
 ```javascript
 {
   type: 'photo:uploaded',
@@ -48,6 +51,7 @@ Hệ thống sử dụng Socket.IO để cung cấp các tính năng real-time. 
 ```
 
 **Frontend usage**:
+
 ```typescript
 socket.on('photo:uploaded', (event) => {
   const { photo, uploaded_by } = event.data;
@@ -67,10 +71,12 @@ socket.on('photo:uploaded', (event) => {
 **Mô tả**: Được emit khi user xóa photo. Tất cả friends và người đang xem photo sẽ nhận được event này.
 
 **Emit to**:
+
 - `user:{friendId}` (tất cả friends)
 - `photo:{photoId}` (ai đang xem photo)
 
 **Event data structure**:
+
 ```javascript
 {
   type: 'photo:deleted',
@@ -83,6 +89,7 @@ socket.on('photo:uploaded', (event) => {
 ```
 
 **Frontend usage**:
+
 ```typescript
 socket.on('photo:deleted', (event) => {
   const { photo_id, deleted_by } = event.data;
@@ -110,6 +117,7 @@ socket.on('photo:deleted', (event) => {
 **Emit to**: `user:{photoOwnerId}` (chủ photo)
 
 **Event data structure**:
+
 ```javascript
 {
   type: 'photo:reaction',
@@ -134,6 +142,7 @@ socket.on('photo:deleted', (event) => {
 ```
 
 **Frontend usage**:
+
 ```typescript
 socket.on('photo:reaction', (event) => {
   const { photo_id, reaction } = event.data;
@@ -146,7 +155,7 @@ socket.on('photo:reaction', (event) => {
     title: 'New Reaction',
     message: `${reaction.user.name} reacted ${reaction.emoji} to your photo`,
     avatar: reaction.user.avatar,
-    onClick: () => router.push(`/photos/${photo_id}`)
+    onClick: () => router.push(`/photos/${photo_id}`),
   });
 });
 ```
@@ -160,6 +169,7 @@ socket.on('photo:reaction', (event) => {
 **Emit to**: `photo:{photoId}` (ai đang xem photo)
 
 **Event data structure**:
+
 ```javascript
 // When reaction added
 {
@@ -189,6 +199,7 @@ socket.on('photo:reaction', (event) => {
 ```
 
 **Frontend usage**:
+
 ```typescript
 socket.on('photo:reaction:updated', (event) => {
   const { photo_id, reaction, user_id, removed } = event.data;
@@ -215,6 +226,7 @@ socket.on('photo:reaction:updated', (event) => {
 **Emit to**: `user:{photoOwnerId}` (chủ photo)
 
 **Event data structure**:
+
 ```javascript
 {
   type: 'photo:reaction:removed',
@@ -235,6 +247,7 @@ socket.on('photo:reaction:updated', (event) => {
 **Emit to**: `user:{photoOwnerId}` (chủ photo)
 
 **Event data structure**:
+
 ```javascript
 {
   type: 'photo:viewed',
@@ -258,6 +271,7 @@ socket.on('photo:reaction:updated', (event) => {
 ```
 
 **Frontend usage**:
+
 ```typescript
 socket.on('photo:viewed', (event) => {
   const { photo_id, view } = event.data;
@@ -270,6 +284,185 @@ socket.on('photo:viewed', (event) => {
 
   // Optional: Show subtle notification
   console.log(`${view.user.name} viewed your photo`);
+});
+```
+
+---
+
+## 👥 Friend Request Events
+
+### 1. Friend Request Received (`friend:request:received`)
+
+**Mô tả**: Được emit khi có user gửi lời mời kết bạn. Receiver nhận event này.
+
+**Emit to**: `user:{receiverId}` (người nhận lời mời)
+
+**Event data structure**:
+
+```javascript
+{
+  type: 'friend:request:received',
+  data: {
+    request: {
+      id: 'request-uuid-123',
+      sender: {
+        id: 'sender-uuid-456',
+        name: 'John Doe',
+        username: 'johndoe',
+        avatar: 'https://...'
+      },
+      message: 'Hi! Let\'s be friends',
+      status: 'pending',
+      created_at: '2025-01-20T10:30:00Z'
+    }
+  },
+  timestamp: '2025-01-20T10:30:00.456Z'
+}
+```
+
+**Frontend usage**:
+
+```typescript
+socket.on('friend:request:received', (event) => {
+  const { request } = event.data;
+
+  // Add to friend request list
+  addFriendRequest(request);
+
+  // Update badge count
+  incrementFriendRequestCount();
+
+  // Show notification
+  showNotification({
+    title: 'New Friend Request',
+    message: `${request.sender.name} sent you a friend request`,
+    avatar: request.sender.avatar,
+    onClick: () => router.push('/friends/requests')
+  });
+
+  // Play sound
+  playNotificationSound();
+});
+```
+
+---
+
+### 2. Friend Request Accepted (`friend:request:accepted`)
+
+**Mô tả**: Được emit khi lời mời kết bạn được chấp nhận. Sender nhận event này.
+
+**Emit to**: `user:{senderId}` (người gửi lời mời ban đầu)
+
+**Event data structure**:
+
+```javascript
+{
+  type: 'friend:request:accepted',
+  data: {
+    friend: {
+      id: 'acceptor-uuid-789',
+      name: 'Jane Smith',
+      username: 'janesmith',
+      avatar: 'https://...'
+    }
+  },
+  timestamp: '2025-01-20T10:35:00.789Z'
+}
+```
+
+**Frontend usage**:
+
+```typescript
+socket.on('friend:request:accepted', (event) => {
+  const { friend } = event.data;
+
+  // Add to friends list
+  addFriend(friend);
+
+  // Remove from pending requests
+  removePendingRequest(friend.id);
+
+  // Show notification
+  showNotification({
+    title: 'Friend Request Accepted',
+    message: `${friend.name} accepted your friend request`,
+    avatar: friend.avatar,
+    onClick: () => router.push(`/profile/${friend.username}`)
+  });
+
+  // Play celebration sound
+  playCelebrationSound();
+});
+```
+
+---
+
+### 3. Friend Request Rejected (`friend:request:rejected`)
+
+**Mô tả**: Được emit khi lời mời kết bạn bị từ chối. Sender nhận event này (optional).
+
+**Emit to**: `user:{senderId}` (người gửi lời mời)
+
+**Event data structure**:
+
+```javascript
+{
+  type: 'friend:request:rejected',
+  data: {
+    request_id: 'request-uuid-123'
+  },
+  timestamp: '2025-01-20T10:36:00.123Z'
+}
+```
+
+**Frontend usage**:
+
+```typescript
+socket.on('friend:request:rejected', (event) => {
+  const { request_id } = event.data;
+
+  // Remove from pending requests
+  removePendingRequest(request_id);
+
+  // Update UI silently (don't show notification to avoid negative UX)
+  updateRequestsList();
+});
+```
+
+---
+
+### 4. Friend Request Cancelled (`friend:request:cancelled`)
+
+**Mô tả**: Được emit khi sender hủy lời mời kết bạn. Receiver nhận event này.
+
+**Emit to**: `user:{receiverId}` (người nhận lời mời)
+
+**Event data structure**:
+
+```javascript
+{
+  type: 'friend:request:cancelled',
+  data: {
+    request_id: 'request-uuid-123'
+  },
+  timestamp: '2025-01-20T10:37:00.456Z'
+}
+```
+
+**Frontend usage**:
+
+```typescript
+socket.on('friend:request:cancelled', (event) => {
+  const { request_id } = event.data;
+
+  // Remove from received requests list
+  removeReceivedRequest(request_id);
+
+  // Update badge count
+  decrementFriendRequestCount();
+
+  // Update UI
+  refreshFriendRequestsList();
 });
 ```
 
@@ -326,11 +519,13 @@ const leavePhoto = (photoId: string) => {
 };
 ```
 
-### Register All Photo Event Listeners
+### Register All Event Listeners
 
 ```typescript
 useEffect(() => {
   if (!socket) return;
+
+  // ========== Photo Events ==========
 
   // Photo uploaded
   const handlePhotoUploaded = (event: any) => {
@@ -380,20 +575,82 @@ useEffect(() => {
     addViewerToPhoto(photo_id, view.user);
   };
 
-  // Register listeners
+  // ========== Friend Request Events ==========
+
+  // Friend request received
+  const handleFriendRequestReceived = (event: any) => {
+    const { request } = event.data;
+    addFriendRequest(request);
+    incrementFriendRequestCount();
+
+    showNotification({
+      title: 'New Friend Request',
+      message: `${request.sender.name} sent you a friend request`,
+      avatar: request.sender.avatar,
+      onClick: () => router.push('/friends/requests'),
+    });
+
+    playNotificationSound();
+  };
+
+  // Friend request accepted
+  const handleFriendRequestAccepted = (event: any) => {
+    const { friend } = event.data;
+    addFriend(friend);
+    removePendingRequest(friend.id);
+
+    showNotification({
+      title: 'Friend Request Accepted',
+      message: `${friend.name} accepted your friend request`,
+      avatar: friend.avatar,
+      onClick: () => router.push(`/profile/${friend.username}`),
+    });
+
+    playCelebrationSound();
+  };
+
+  // Friend request rejected
+  const handleFriendRequestRejected = (event: any) => {
+    const { request_id } = event.data;
+    removePendingRequest(request_id);
+    updateRequestsList();
+  };
+
+  // Friend request cancelled
+  const handleFriendRequestCancelled = (event: any) => {
+    const { request_id } = event.data;
+    removeReceivedRequest(request_id);
+    decrementFriendRequestCount();
+    refreshFriendRequestsList();
+  };
+
+  // Register photo listeners
   socket.on('photo:uploaded', handlePhotoUploaded);
   socket.on('photo:deleted', handlePhotoDeleted);
   socket.on('photo:reaction', handlePhotoReaction);
   socket.on('photo:reaction:updated', handleReactionUpdated);
   socket.on('photo:viewed', handlePhotoViewed);
 
+  // Register friend request listeners
+  socket.on('friend:request:received', handleFriendRequestReceived);
+  socket.on('friend:request:accepted', handleFriendRequestAccepted);
+  socket.on('friend:request:rejected', handleFriendRequestRejected);
+  socket.on('friend:request:cancelled', handleFriendRequestCancelled);
+
   // Cleanup
   return () => {
+    // Remove photo listeners
     socket.off('photo:uploaded', handlePhotoUploaded);
     socket.off('photo:deleted', handlePhotoDeleted);
     socket.off('photo:reaction', handlePhotoReaction);
     socket.off('photo:reaction:updated', handleReactionUpdated);
     socket.off('photo:viewed', handlePhotoViewed);
+
+    // Remove friend request listeners
+    socket.off('friend:request:received', handleFriendRequestReceived);
+    socket.off('friend:request:accepted', handleFriendRequestAccepted);
+    socket.off('friend:request:rejected', handleFriendRequestRejected);
+    socket.off('friend:request:cancelled', handleFriendRequestCancelled);
   };
 }, [socket]);
 ```

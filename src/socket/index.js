@@ -1,5 +1,6 @@
 const socketAuthMiddleware = require('./middlewares/auth.middleware');
 const PhotoSocketHandler = require('./handlers/photo.handler');
+const FriendSocketHandler = require('./handlers/friend.handler');
 const logger = require('@utils/logger');
 
 /**
@@ -11,6 +12,7 @@ function initializeSocket(io) {
 
   // Initialize handlers
   const photoHandler = new PhotoSocketHandler(io);
+  const friendHandler = new FriendSocketHandler(io);
 
   // Handle connections
   io.on('connection', (socket) => {
@@ -46,6 +48,7 @@ function initializeSocket(io) {
 
   // Store handlers in io instance for access from controllers
   io.photoHandler = photoHandler;
+  io.friendHandler = friendHandler;
 
   logger.info('Socket.IO initialized with handlers');
   return io;

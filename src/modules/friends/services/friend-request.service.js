@@ -1,6 +1,9 @@
 const friendRequestRepository = require('../repositories/friend-request.repository');
 const friendRepository = require('../repositories/friend.repository');
 const userRepository = require('@modules/user/repositories/user.repository');
+const notificationRepository = require('@modules/notifications/repositories/notification.repository');
+const socketConfig = require('@config/socket.config');
+const logger = require('@utils/logger');
 const AppException = require('@exceptions/app.exception');
 
 /**
@@ -92,6 +95,38 @@ class FriendRequestService {
 
     const request = await friendRequestRepository.create(senderId, receiverId, message);
 
+    // Create notification for receiver
+    try {
+      await notificationRepository.createFriendRequestNotification(
+        receiverId,
+        senderId,
+        request.id
+      );
+    } catch (notifError) {
+      logger.error('Failed to create friend request notification:', notifError);
+    }
+
+    // Emit real-time socket event
+    try {
+      const io = socketConfig.getIO();
+      if (io.friendHandler) {
+        io.friendHandler.emitFriendRequestSent(receiverId, {
+          id: request.id,
+          sender: {
+            id: request.sender.id,
+            name: request.sender.name,
+            username: request.sender.username,
+            avatar: request.sender.avatar,
+          },
+          message: request.message,
+          status: request.status,
+          created_at: request.createdAt,
+        });
+      }
+    } catch (socketError) {
+      logger.error('Failed to emit friend request event:', socketError);
+    }
+
     return {
       id: request.id,
       receiver: {
@@ -132,6 +167,31 @@ class FriendRequestService {
     // Update request status
     await friendRequestRepository.updateStatus(requestId, 'accepted');
 
+    // Get acceptor info
+    const acceptor = await userRepository.findById(userId);
+
+    // Create notification for sender
+    try {
+      await notificationRepository.createFriendAcceptedNotification(request.senderId, userId);
+    } catch (notifError) {
+      logger.error('Failed to create friend accepted notification:', notifError);
+    }
+
+    // Emit real-time socket event
+    try {
+      const io = socketConfig.getIO();
+      if (io.friendHandler) {
+        io.friendHandler.emitFriendRequestAccepted(request.senderId, {
+          id: acceptor.id,
+          name: acceptor.name,
+          username: acceptor.username,
+          avatar: acceptor.avatar,
+        });
+      }
+    } catch (socketError) {
+      logger.error('Failed to emit friend request accepted event:', socketError);
+    }
+
     return {
       message: 'Friend request accepted',
       friend: {
@@ -166,6 +226,16 @@ class FriendRequestService {
     // Update request status
     await friendRequestRepository.updateStatus(requestId, 'rejected');
 
+    // Emit real-time socket event (optional - user may not want to notify rejection)
+    try {
+      const io = socketConfig.getIO();
+      if (io.friendHandler) {
+        io.friendHandler.emitFriendRequestRejected(request.senderId, requestId);
+      }
+    } catch (socketError) {
+      logger.error('Failed to emit friend request rejected event:', socketError);
+    }
+
     return { message: 'Friend request rejected' };
   }
 
@@ -191,6 +261,16 @@ class FriendRequestService {
 
     // Delete request
     await friendRequestRepository.delete(requestId);
+
+    // Emit real-time socket event to receiver
+    try {
+      const io = socketConfig.getIO();
+      if (io.friendHandler) {
+        io.friendHandler.emitFriendRequestCancelled(request.receiverId, requestId);
+      }
+    } catch (socketError) {
+      logger.error('Failed to emit friend request cancelled event:', socketError);
+    }
 
     return { message: 'Friend request cancelled' };
   }

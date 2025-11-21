@@ -67,6 +67,7 @@ User A receives notification (both database + real-time)
 ### Notification Data Structure
 
 **Database notification:**
+
 ```json
 {
   "id": "notif-uuid-123",
@@ -94,6 +95,7 @@ User A receives notification (both database + real-time)
 ```
 
 **Socket.IO real-time event:**
+
 ```javascript
 // Event name: 'photo:reaction'
 {
@@ -129,7 +131,13 @@ User A receives notification (both database + real-time)
 
 interface Notification {
   id: string;
-  type: 'reaction' | 'friend_request' | 'photo_uploaded' | 'friend_accepted' | 'photo_view' | 'message';
+  type:
+    | 'reaction'
+    | 'friend_request'
+    | 'photo_uploaded'
+    | 'friend_accepted'
+    | 'photo_view'
+    | 'message';
   data: {
     message: string;
     emoji?: string;
@@ -141,7 +149,7 @@ interface Notification {
     };
   };
   relatedUserId?: string;
-  relatedItemId?: string; // Photo ID
+  relatedItemId?: string; // Photo
   isRead: boolean;
   readAt?: string;
   createdAt: string;
@@ -182,7 +190,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   markAllAsRead: async () => {
     await api.patch('/notifications/read-all');
     set((state) => ({
-      notifications: state.notifications.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })),
+      notifications: state.notifications.map((n) => ({
+        ...n,
+        isRead: true,
+        readAt: new Date().toISOString(),
+      })),
       unreadCount: 0,
     }));
   },
@@ -577,6 +589,7 @@ Response:
 ### Toast Notifications
 
 **React Hot Toast:**
+
 ```typescript
 toast.custom((t) => (
   <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} ...`}>
@@ -596,6 +609,7 @@ toast.custom((t) => (
 Place notification sound in `public/sounds/notification.mp3`
 
 **Recommended sounds:**
+
 - iOS notification sound
 - Subtle "pop" or "ding"
 - Duration: 0.5-1 second
@@ -603,6 +617,7 @@ Place notification sound in `public/sounds/notification.mp3`
 ### Badge Count
 
 Show unread count on:
+
 - Notification bell icon
 - App icon (using PWA badge API)
 - Browser tab title
@@ -713,11 +728,13 @@ analytics.track('notification_read', {
 ## 🎯 Summary
 
 ✅ **Backend ready:**
+
 - Notification records saved to database
 - Real-time events via Socket.IO
 - REST API for CRUD operations
 
 ✅ **Frontend needs to:**
+
 - Setup notification store (state management)
 - Listen to `photo:reaction` socket event
 - Fetch notifications from API
