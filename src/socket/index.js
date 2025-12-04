@@ -1,6 +1,7 @@
 const socketAuthMiddleware = require('./middlewares/auth.middleware');
 const PhotoSocketHandler = require('./handlers/photo.handler');
 const FriendSocketHandler = require('./handlers/friend.handler');
+const ChatSocketHandler = require('./handlers/chat.handler');
 const logger = require('@utils/logger');
 
 /**
@@ -13,6 +14,7 @@ function initializeSocket(io) {
   // Initialize handlers
   const photoHandler = new PhotoSocketHandler(io);
   const friendHandler = new FriendSocketHandler(io);
+  const chatHandler = new ChatSocketHandler(io);
 
   // Handle connections
   io.on('connection', (socket) => {
@@ -35,6 +37,16 @@ function initializeSocket(io) {
       logger.info(`User ${userId} left photo room: photo:${photoId}`);
     });
 
+    // Handle joining chat thread rooms
+    socket.on('chat:join_thread', (data, callback) => {
+      chatHandler.handleJoinThread(socket, data, callback);
+    });
+
+    // Handle leaving chat thread rooms
+    socket.on('chat:leave_thread', (data) => {
+      chatHandler.handleLeaveThread(socket, data);
+    });
+
     // Handle disconnect
     socket.on('disconnect', (reason) => {
       logger.info(`Socket disconnected: User ${userId} (Reason: ${reason})`);
@@ -49,6 +61,7 @@ function initializeSocket(io) {
   // Store handlers in io instance for access from controllers
   io.photoHandler = photoHandler;
   io.friendHandler = friendHandler;
+  io.chatHandler = chatHandler;
 
   logger.info('Socket.IO initialized with handlers');
   return io;

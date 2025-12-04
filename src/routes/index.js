@@ -6,6 +6,7 @@ const { photoRoutes } = require('@modules/photos');
 const friendRoutes = require('@modules/friends/routes/friend.routes');
 const notificationRoutes = require('@modules/notifications/routes/notification.routes');
 const settingRoutes = require('@modules/settings/routes/setting.routes');
+const chatRoutes = require('@modules/chats/routes/chat.routes');
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ router.get('/health', (req, res) => {
 // Module routes
 router.use('/auth', authRoutes);
 router.use('/mail', mailRoutes);
+router.use('/chats', chatRoutes);
 router.use('/', settingRoutes); // Must be before /photos to handle /photos/all
 router.use('/photos', photoRoutes);
 router.use('/', friendRoutes);

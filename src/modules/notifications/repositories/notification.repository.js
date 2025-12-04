@@ -145,6 +145,22 @@ class NotificationRepository {
       photoId
     );
   }
+
+  /**
+   * Create chat message notification
+   */
+  async createChatMessageNotification(receiverId, senderId, messageId) {
+    return await this.create(
+      receiverId,
+      'message',
+      'New Message',
+      {
+        message: 'sent you a message',
+      },
+      senderId,
+      messageId
+    );
+  }
 }
 
 module.exports = new NotificationRepository();

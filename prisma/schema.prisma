@@ -76,6 +76,10 @@ model User {
   receivedRequests        FriendRequest[]  @relation("ReceivedRequests")
   sentChats               Chat[]           @relation("SentChats")
   receivedChats           Chat[]           @relation("ReceivedChats")
+  chatThreadsAsUser1      ChatThread[]     @relation("ThreadUser1")
+  chatThreadsAsUser2      ChatThread[]     @relation("ThreadUser2")
+  sentChatMessages        ChatMessage[]    @relation("MessageSender")
+  receivedChatMessages    ChatMessage[]    @relation("MessageReceiver")
   notifications           Notification[]
   relatedNotifications    Notification[]   @relation("NotificationRelatedUser")
   refreshTokens           RefreshToken[]
@@ -139,9 +143,11 @@ model Photo {
   updatedAt DateTime @updatedAt @map("updated_at")
   expiresAt DateTime? @map("expires_at")
 
-  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reactions PhotoReaction[]
-  views     PhotoView[]
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reactions   PhotoReaction[]
+  views       PhotoView[]
+  chatThreads ChatThread[]
+  chatMessages ChatMessage[]
 
   @@index([userId])
   @@index([createdAt])
@@ -293,4 +299,51 @@ model RefreshToken {
   @@index([token])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+// 10. CHAT THREADS TABLE
+model ChatThread {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  user1Id   String   @map("user1_id")
+  user2Id   String   @map("user2_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  post     Photo         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user1    User          @relation("ThreadUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2    User          @relation("ThreadUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@unique([postId, user1Id, user2Id])
+  @@index([postId])
+  @@index([user1Id])
+  @@index([user2Id])
+  @@index([updatedAt])
+  @@map("chat_threads")
+}
+
+// 11. CHAT MESSAGES TABLE
+model ChatMessage {
+  id         String    @id @default(uuid())
+  threadId   String    @map("thread_id")
+  postId     String    @map("post_id")
+  senderId   String    @map("sender_id")
+  receiverId String    @map("receiver_id")
+  message    String?   @db.Text
+  photoUrl   String?   @map("photo_url")
+  isRead     Boolean   @default(false) @map("is_read")
+  readAt     DateTime? @map("read_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  thread   ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  post     Photo      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  sender   User       @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User       @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@map("chat_messages")
 }
